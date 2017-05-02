@@ -1,6 +1,6 @@
 {
   "name": "gnost",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Node.js CLI bootstrapper powered by minimist and inquirer",
   "bin": {
     "gnost": "gnost"
