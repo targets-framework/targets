@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const Gnost = require('.');
+const Targets = require('../..');
 const requireDir = require('require-dir');
 
-Gnost(requireDir('./plugins'));
+Targets(requireDir('./targets'));

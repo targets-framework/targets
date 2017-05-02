@@ -4,33 +4,32 @@
 // packages
 const inquirer = require('inquirer');
 const _ = require('lodash');
-const requireDir = require('require-dir');
-const argv = require('minimist')(process.argv.slice(2))
+const argv = require('minimist')(process.argv.slice(2));
 
 // file modules
-const prompts = require('./prompts');
-const invokePlugins = require('./lib/invokePlugins');
+const Prompts = require('./prompts');
+const invokeTargets = require('./lib/invokeTargets');
 const printResults = require('./lib/printResults');
 
-function applyOptions(plugins) {
+function applyOptions(targets) {
     let resultsPromise;
     if (argv._.length) {
         let payload = _.omit(argv, '_');
         payload.options = argv._;
-        payload.plugins = plugins;
-        resultsPromise = invokePlugins(payload);
+        payload.targets = targets;
+        resultsPromise = invokeTargets(payload);
     } else {
-        resultsPromise = inquirer.prompt(prompts)
+        resultsPromise = inquirer.prompt(Prompts(targets))
             .then((payload) => {
-                payload.plugins = plugins;
-                return invokePlugins(payload);
+                payload.targets = targets;
+                return invokeTargets(payload);
             });
     }
     return resultsPromise;
 }
 
-function Gnost(plugins){
-    return applyOptions(plugins).then(printResults);
+function Targets(targets){
+    return applyOptions(targets).then(printResults);
 }
 
-module.exports = Gnost;
+module.exports = Targets;
