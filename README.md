@@ -13,7 +13,7 @@ exercise to get started.
 #### Save targets as a dependency to your package
 
 ```text
-> npm install --save targets
+npm install --save targets
 ```
 
 #### Copy the following to a file called `./mycli`.
@@ -61,25 +61,25 @@ Targets({
 #### Make it executable.
 
 ```text
-> chmod +x ./mycli
+chmod +x ./mycli
 ```
 
 #### Run
 
 ```text
-> ./mycli
+./mycli
 ```
 
 When you run your tool without arguments and you'll be prompted for any registered targets, if those targets have prompts you'll receive those as well.
 
 ```text
-> ./mycli greet --name=Bob
+./mycli greet --name=Bob
 ```
 
 When you run your tool with the target name and options, your target will run with those options.
 
 ```text
-> ./mycli foo greet --name=Bob
+./mycli foo greet --name=Bob
 ```
 
 When you run your tool with multiple target names and options, all specified targets will run with those options.
