@@ -118,11 +118,37 @@ describe('Targets', () => {
                 expect(console.log).to.have.been.calledWith(sinon.match.any, "unavailable");
             });
         });
-        it('should have any prompts which they define added to the main prompts', () => {
+        it('should use function name if no label found', () => {
             let { Targets } = setup({
-                answers: {
-                    options: [ "foo" ]
+                argv: {
+                    _: [ 'foo' ]
                 }
+            });
+            const foo = sandbox.stub().returns(Promise.resolve('bar'));
+            sandbox.spy(console, 'log');
+            return Targets({ foo }).then(() => {
+                expect(console.log).to.have.been.calledWith(sinon.match(/proxy/), sinon.match.any);
+            });
+        });
+        it('should log if target not found', () => {
+            let { Targets } = setup({
+                argv: {
+                    _: [ 'boom' ]
+                }
+            });
+            const foo = sandbox.stub().returns(Promise.reject());
+            foo.label = "Foo";
+            sandbox.spy(console, 'log');
+            return Targets({ foo }).then(() => {
+                expect(console.log).to.have.been.calledWith("no target found");
+            });
+        });
+        it('should have any prompts which they define added to the main prompts', () => {
+            let answers = {
+                options: [ "foo" ]
+            };
+            let { Targets } = setup({
+                answers
             });
             const foo = sandbox.stub().returns(Promise.resolve("bar"));
             foo.label = "Foo";
@@ -137,7 +163,107 @@ describe('Targets', () => {
             return Targets({ foo }).then(() => {
                 expect(inquirer.prompt).to.have.been.called;
                 expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
-                    return prompts.length === 2 && prompts[1].default === foo.prompts[0].default && prompts[1].name === foo.prompts[0].name && prompts[1].message === foo.prompts[0].message;
+                    return prompts.length === 2 && prompts[1].default === foo.prompts[0].default && prompts[1].name === foo.prompts[0].name && prompts[1].message === foo.prompts[0].message && prompts[1].when(answers) === true;
+                }));
+            });
+        });
+        it('should register `when` if set as false (along with the default `when`)', () => {
+            let answers = {
+                options: [ "foo" ]
+            };
+            let { Targets } = setup({
+                answers
+            });
+            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            foo.label = "Foo";
+            foo.prompts = [
+                {
+                    type: 'input',
+                    name: "foo",
+                    message: "Bar?",
+                    default: "Bar",
+                    when: false
+                }
+            ];
+            return Targets({ foo }).then(() => {
+                expect(inquirer.prompt).to.have.been.called;
+                expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
+                    return prompts[1].when(answers) === false;
+                }));
+            });
+        });
+        it('should register `when` if set as true (along with the default `when`)', () => {
+            let answers = {
+                options: [ "foo" ]
+            };
+            let { Targets } = setup({
+                answers
+            });
+            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            foo.label = "Foo";
+            foo.prompts = [
+                {
+                    type: 'input',
+                    name: "foo",
+                    message: "Bar?",
+                    default: "Bar",
+                    when: true
+                }
+            ];
+            return Targets({ foo }).then(() => {
+                expect(inquirer.prompt).to.have.been.called;
+                expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
+                    return prompts[1].when(answers) === true;
+                }));
+            });
+        });
+        it('should register `when` if set as function returning false (along with the default `when`)', () => {
+            let answers = {
+                options: [ "foo" ]
+            };
+            let { Targets } = setup({
+                answers
+            });
+            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            foo.label = "Foo";
+            foo.prompts = [
+                {
+                    type: 'input',
+                    name: "foo",
+                    message: "Bar?",
+                    default: "Bar",
+                    when: () => false
+                }
+            ];
+            return Targets({ foo }).then(() => {
+                expect(inquirer.prompt).to.have.been.called;
+                expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
+                    return prompts[1].when(answers) === false;
+                }));
+            });
+        });
+        it('should register `when` if set as function returning true (along with the default `when`)', () => {
+            let answers = {
+                options: [ "foo" ]
+            };
+            let { Targets } = setup({
+                answers
+            });
+            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            foo.label = "Foo";
+            foo.prompts = [
+                {
+                    type: 'input',
+                    name: "foo",
+                    message: "Bar?",
+                    default: "Bar",
+                    when: () => true
+                }
+            ];
+            return Targets({ foo }).then(() => {
+                expect(inquirer.prompt).to.have.been.called;
+                expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
+                    return prompts[1].when(answers) === true;
                 }));
             });
         });
