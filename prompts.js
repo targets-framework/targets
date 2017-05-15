@@ -32,11 +32,11 @@ function Prompts(targets) {
             let getterPrompts = _.map(getter.prompts, (prompt) => {
                 let when = prompt.when;
                 if (_.isFunction(when)) {
-                    prompt.when = (answers) => (answers.options.indexOf(getterKey) >= 0) && when(answers);
+                    prompt.when = (answers) => (_.isArray(answers.options) && answers.options.indexOf(getterKey) >= 0) && when(answers);
                 } else if (_.isBoolean(when)) {
-                    prompt.when = (answers) => when && (answers.options.indexOf(getterKey) >= 0);
+                    prompt.when = (answers) => when && (_.isArray(answers.options) && answers.options.indexOf(getterKey) >= 0);
                 } else {
-                    prompt.when = (answers) => answers.options.indexOf(getterKey) >= 0;
+                    prompt.when = (answers) => _.isArray(answers.options) && answers.options.indexOf(getterKey) >= 0;
                 }
                 return prompt;
             });

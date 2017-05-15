@@ -29,7 +29,9 @@ function applyOptions(targets) {
 }
 
 function Targets(targets){
-    return applyOptions(targets).then(printResults);
+    return applyOptions(targets)
+        .then(printResults)
+        .catch(console.error);
 }
 
 module.exports = Targets;
