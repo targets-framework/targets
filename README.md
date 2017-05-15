@@ -73,13 +73,13 @@ chmod +x ./mycli
 When you run your tool without arguments and you'll be prompted for any registered targets, if those targets have prompts you'll receive those as well.
 
 ```text
-./mycli greet --name=Bob
+./mycli greet --greet.name=Bob
 ```
 
 When you run your tool with the target name and options, your target will run with those options.
 
 ```text
-./mycli foo greet --name=Bob
+./mycli foo greet --greet.name=Bob
 ```
 
 When you run your tool with multiple target names and options, all specified targets will run with those options.
