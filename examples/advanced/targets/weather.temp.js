@@ -4,9 +4,9 @@ const weatherJs = require('weather-js');
 const Promise = require('bluebird');
 const _ = require('lodash');
 
-function getSkytext(results) {
+function getTemp(results) {
     if (results.length) {
-        return _.result(results, '[0].current.skytext');
+        return _.result(results, '[0].current.temperature');
     } else {
         return 'Location not found';
     }
@@ -14,14 +14,14 @@ function getSkytext(results) {
 
 function weather(answers) {
     const options = {
-        search: answers.location,
+        search: answers.weather.location,
         degreeType: 'F'
     };
     return Promise.promisify(weatherJs.find)(options)
-        .then(getSkytext);
+        .then(getTemp);
 }
 
-weather.label = "Current Weather";
+weather.label = "Current Temperature";
 
 weather.prompts = [
     {

@@ -4,4 +4,6 @@
 const Targets = require('../..');
 const requireDir = require('require-dir');
 
-Targets(requireDir('./targets'));
+Targets({
+    targets: requireDir('./targets')
+});

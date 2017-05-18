@@ -32,6 +32,8 @@ greet.prompts = [
  * Register targets
  */
 Targets({
-    greet,
-    foo
+    targets: {
+        greet,
+        foo
+    }
 });

@@ -27,7 +27,7 @@ describe('Targets', () => {
             answers = { options: [] }
         } = options;
         let {
-            Targets = proxyquire('..', { minimist: () => argv }),
+            Targets = proxyquire('..', { minimist: () => argv, './lib/config': {} }),
         } = options;
         const promptOptions = {
             type: 'checkbox',
@@ -38,7 +38,7 @@ describe('Targets', () => {
         const prompts = [
             promptOptions
         ];
-        sandbox.stub(inquirer, 'prompt').returns(Promise.resolve(answers));
+        sandbox.stub(inquirer, 'prompt').resolves(answers);
         return { argv, Targets, prompts, answers };
     }
 
@@ -52,7 +52,7 @@ describe('Targets', () => {
             ]
         });
         function foo() { return 'bar'; }
-        return Targets({ foo }).then(() => {
+        return Targets({ targets: { foo } }).then(() => {
             expect(inquirer.prompt).to.have.been.called;
             expect(inquirer.prompt).to.have.been.calledWith(prompts);
         });
@@ -68,7 +68,7 @@ describe('Targets', () => {
             foo.label = "Foo";
             const bar = sandbox.stub().returns("bar");
             bar.label = "Bar";
-            return Targets({ foo, bar }).then(() => {
+            return Targets({ targets: { foo, bar } }).then(() => {
                 expect(foo).to.have.been.called;
                 expect(bar).to.have.been.called;
             });
@@ -83,7 +83,7 @@ describe('Targets', () => {
             foo.label = "Foo";
             const bar = sandbox.stub().returns("bar");
             bar.label = "Bar";
-            return Targets({ foo, bar }).then(() => {
+            return Targets({ targets: { foo, bar } }).then(() => {
                 expect(foo).to.have.been.calledWith(sinon.match.has('options', [ 'foo', 'bar' ]));
                 expect(bar).to.have.been.calledWith(sinon.match.has('options', [ 'foo', 'bar' ]));
             });
@@ -98,7 +98,7 @@ describe('Targets', () => {
             foo.label = "Foo";
             const bar = sandbox.stub().returns("bar");
             bar.label = "Bar";
-            return Targets({ foo, bar }).then(() => {
+            return Targets({ targets: { foo, bar } }).then(() => {
                 expect(foo).to.have.been.calledWith(sinon.match.has('options', [ 'foo', 'bar' ]));
                 expect(bar).to.have.been.calledWith(sinon.match.has('options', [ 'foo', 'bar' ]));
             });
@@ -109,12 +109,12 @@ describe('Targets', () => {
                     _: [ 'foo', 'bar' ]
                 }
             });
-            const foo = sandbox.stub().returns(Promise.reject());
+            const foo = sandbox.stub().rejects();
             foo.label = "Foo";
-            const bar = sandbox.stub().returns(Promise.reject());
+            const bar = sandbox.stub().rejects();
             bar.label = "Bar";
             sandbox.spy(console, 'log');
-            return Targets({ foo, bar }).then(() => {
+            return Targets({ targets: { foo, bar } }).then(() => {
                 expect(console.log).to.have.been.calledWith(sinon.match.any, "unavailable");
             });
         });
@@ -124,9 +124,9 @@ describe('Targets', () => {
                     _: [ 'foo' ]
                 }
             });
-            const foo = sandbox.stub().returns(Promise.resolve('bar'));
+            const foo = sandbox.stub().resolves('bar');
             sandbox.spy(console, 'log');
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(console.log).to.have.been.calledWith(sinon.match(/proxy/), sinon.match.any);
             });
         });
@@ -136,10 +136,10 @@ describe('Targets', () => {
                     _: [ 'boom' ]
                 }
             });
-            const foo = sandbox.stub().returns(Promise.reject());
+            const foo = sandbox.stub().rejects();
             foo.label = "Foo";
             sandbox.spy(console, 'log');
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(console.log).to.have.been.calledWith("no target found");
             });
         });
@@ -150,7 +150,7 @@ describe('Targets', () => {
             let { Targets } = setup({
                 answers
             });
-            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            const foo = sandbox.stub().resolves("bar");
             foo.label = "Foo";
             foo.prompts = [
                 {
@@ -160,7 +160,7 @@ describe('Targets', () => {
                     default: "Bar"
                 }
             ];
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(inquirer.prompt).to.have.been.called;
                 expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
                     return prompts.length === 2 && prompts[1].default === foo.prompts[0].default && prompts[1].name === foo.prompts[0].name && prompts[1].message === foo.prompts[0].message && prompts[1].when(answers) === true;
@@ -174,7 +174,7 @@ describe('Targets', () => {
             let { Targets } = setup({
                 answers
             });
-            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            const foo = sandbox.stub().resolves("bar");
             foo.label = "Foo";
             foo.prompts = [
                 {
@@ -185,7 +185,7 @@ describe('Targets', () => {
                     when: false
                 }
             ];
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(inquirer.prompt).to.have.been.called;
                 expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
                     return prompts[1].when(answers) === false;
@@ -199,7 +199,7 @@ describe('Targets', () => {
             let { Targets } = setup({
                 answers
             });
-            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            const foo = sandbox.stub().resolves("bar");
             foo.label = "Foo";
             foo.prompts = [
                 {
@@ -210,7 +210,7 @@ describe('Targets', () => {
                     when: true
                 }
             ];
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(inquirer.prompt).to.have.been.called;
                 expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
                     return prompts[1].when(answers) === true;
@@ -224,7 +224,7 @@ describe('Targets', () => {
             let { Targets } = setup({
                 answers
             });
-            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            const foo = sandbox.stub().resolves("bar");
             foo.label = "Foo";
             foo.prompts = [
                 {
@@ -235,7 +235,7 @@ describe('Targets', () => {
                     when: () => false
                 }
             ];
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(inquirer.prompt).to.have.been.called;
                 expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
                     return prompts[1].when(answers) === false;
@@ -249,7 +249,7 @@ describe('Targets', () => {
             let { Targets } = setup({
                 answers
             });
-            const foo = sandbox.stub().returns(Promise.resolve("bar"));
+            const foo = sandbox.stub().resolves("bar");
             foo.label = "Foo";
             foo.prompts = [
                 {
@@ -260,7 +260,7 @@ describe('Targets', () => {
                     when: () => true
                 }
             ];
-            return Targets({ foo }).then(() => {
+            return Targets({ targets: { foo } }).then(() => {
                 expect(inquirer.prompt).to.have.been.called;
                 expect(inquirer.prompt).to.have.been.calledWith(sinon.match((prompts) => {
                     return prompts[1].when(answers) === true;

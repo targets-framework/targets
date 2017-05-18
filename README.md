@@ -1,6 +1,6 @@
 # Targets
 
-> Node.js CLI bootstrapper powered by minimist and inquirer
+> Node.js CLI framework powered by minimist, inquirer and rc
 
 ## Usage
 
@@ -36,7 +36,7 @@ function foo() {
  * a may have a prompts property which contains `inquirer` prompts for the target.
  */
 function greet(options) {
-    let name = options.name || "World";
+    let name = options.greet.name || "World";
     return Promise.resolve(`Hello, ${name}!`);
 }
 greet.label = "greet example";
@@ -53,8 +53,10 @@ greet.prompts = [
  * Register targets
  */
 Targets({
-    greet,
-    foo
+    targets: {
+        greet,
+        foo
+    }
 });
 ```
 
