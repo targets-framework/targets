@@ -28,7 +28,8 @@
     "parent-module": "^0.1.0",
     "rc": "^1.2.1",
     "read-pkg-up": "^2.0.0",
-    "require-dir": "^0.3.1"
+    "require-dir": "^0.3.1",
+    "stream-line-wrapper": "^0.1.1"
   },
   "devDependencies": {
     "bytes": "^2.5.0",
