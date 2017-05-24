@@ -63,7 +63,9 @@ function getConfig(options = {}) {
         const targetNames = config._;
         function promptReducer(acc, targetName) {
             const namespace = targetName.split('.').shift();
-            const targetPrompts = _.map(targets[targetName].prompts, (prompt) => {
+            const target = _.result(targets, targetName, {});
+            const allTargetPrompts = _.result(target, 'prompts', []);
+            const targetPrompts = _.map(allTargetPrompts, (prompt) => {
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
                 return prompt;
             });
