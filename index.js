@@ -53,49 +53,11 @@ function getInitialPrompt(config) {
     }
 }
 
-function getConfig(options = {}) {
-
-    const { name, targets } = options;
-    const answers = Answers({ name });
-
-    function getMissing(config) {
-        const { targets } = config;
-        const targetNames = config._;
-        function promptReducer(acc, targetName) {
-            const namespace = targetName.split('.').shift();
-            const target = targets[targetName] || {};
-            const allTargetPrompts = target.prompts || [];
-            const targetPrompts = _.map(allTargetPrompts, (prompt) => {
-                _.set(prompt, 'name', `${namespace}.${prompt.name}`);
-                return prompt;
-            });
-            acc = acc.concat(targetPrompts);
-            return acc;
-        }
-        const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
-        answers.configure('prompts', prompts);
-        return answers.get().then((c) => {
-            c._ = _.isEmpty(targetNames) ? c._ : targetNames;
-            return c;
-        });
-    }
-
-    function addTargets(config) {
-        config.targets = targets;
-        return config;
-    }
-
-    return answers.get()
-        .then(addTargets)
-        .then(getInitialPrompt)
-        .then(getMissing)
-        .then(addTargets);
-}
-
 function invokeTargets(config) {
     const { targets } = config;
     const targetNames = config._;
-    const pendingTargets = _.reduce(targetNames, (acc, targetName) => {
+
+    function targetReducer(acc, targetName) {
         const target = targets[targetName];
         if (_.isFunction(target)) {
             let targetResponse = target(config);
@@ -109,16 +71,56 @@ function invokeTargets(config) {
             console.log('no target found');
         }
         return acc;
-    }, {});
+    }
+
+    const pendingTargets = _.reduce(targetNames, targetReducer, {});
+
+    function addResults(results) {
+        config.results = results;
+        return config;
+    }
+
     return Promise.props(pendingTargets)
-        .then((results) => {
-            config.results = results;
-            return config;
+        .then(addResults);
+}
+
+function getMissing(config) {
+    const { targets, answers } = config;
+    const targetNames = config._;
+    function promptReducer(acc, targetName) {
+        const namespace = targetName.split('.').shift();
+        const target = targets[targetName] || {};
+        const allTargetPrompts = target.prompts || [];
+        const targetPrompts = _.map(allTargetPrompts, (prompt) => {
+            _.set(prompt, 'name', `${namespace}.${prompt.name}`);
+            return prompt;
         });
+        acc = acc.concat(targetPrompts);
+        return acc;
+    }
+    const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
+    answers.configure('prompts', prompts);
+    return answers.get().then((c) => {
+        c._ = _.isEmpty(targetNames) ? c._ : targetNames;
+        return c;
+    });
 }
 
 function Targets(options = {}) {
-    return getConfig(options)
+    const { name, targets } = options;
+    const answers = Answers({ name });
+
+    function augment(config = {}) {
+        config.targets = targets;
+        config.answers = answers;
+        return config;
+    }
+
+    return answers.get()
+        .then(augment)
+        .then(getInitialPrompt)
+        .then(getMissing)
+        .then(augment)
         .then(invokeTargets)
         .then(printResults)
         .catch(console.error);
