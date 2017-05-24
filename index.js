@@ -73,7 +73,6 @@ function getConfig(options = {}) {
             return acc;
         }
         const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
-            debugger;
         answers.configure('prompts', prompts);
         return answers.get().then((c) => {
             c._ = _.isEmpty(targetNames) ? c._ : targetNames;

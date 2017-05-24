@@ -2,9 +2,6 @@
   "name": "targets",
   "version": "0.1.3",
   "description": "Node.js CLI bootstrapper powered by minimist and inquirer",
-  "bin": {
-    "targets": "targets"
-  },
   "main": "index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
