@@ -1,6 +1,9 @@
 # Targets
 
-> Node.js CLI framework powered by minimist, inquirer and rc
+> a task composition framework
+
+[![Travis](https://img.shields.io/travis/machellerogden/targets.svg)]()
+[![License](https://img.shields.io/npm/l/targets.svg)]()
 
 ## Usage
 

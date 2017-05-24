@@ -42,5 +42,8 @@
     "lint",
     "test",
     "check-coverage"
-  ]
+  ],
+  "engines": {
+    "node": ">=6.4.0"
+  }
 }
