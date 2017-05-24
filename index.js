@@ -20,8 +20,8 @@ function handleStream(stream, target) {
 }
 
 function getChoices(config) {
-    const { targets } = config;
-    const getterPairs = _.toPairs(targets);
+    const { _targets } = config;
+    const getterPairs = _.toPairs(_targets);
     return _.map(getterPairs, (pair) => {
         const getter = pair[1];
         const getterKey = pair[0];
@@ -44,8 +44,8 @@ function getInitialPrompt(config) {
             }
         ];
         return inquirer.prompt(prompts)
-            .then((answers) => {
-                config._ = answers.targetNames;
+            .then((results) => {
+                config._ = results.targetNames;
                 return config;
             });
     } else {
@@ -54,11 +54,11 @@ function getInitialPrompt(config) {
 }
 
 function invokeTargets(config) {
-    const { targets } = config;
+    const { _targets } = config;
     const targetNames = config._;
 
     function targetReducer(acc, targetName) {
-        const target = targets[targetName];
+        const target = _targets[targetName];
         if (_.isFunction(target)) {
             let targetResponse = target(config);
             if (targetResponse instanceof EventEmitter) {
@@ -85,11 +85,11 @@ function invokeTargets(config) {
 }
 
 function getMissing(config) {
-    const { targets, answers } = config;
+    const { _targets, _answers } = config;
     const targetNames = config._;
     function promptReducer(acc, targetName) {
         const namespace = targetName.split('.').shift();
-        const target = targets[targetName] || {};
+        const target = _targets[targetName] || {};
         const allTargetPrompts = target.prompts || [];
         const targetPrompts = _.map(allTargetPrompts, (prompt) => {
             _.set(prompt, 'name', `${namespace}.${prompt.name}`);
@@ -99,8 +99,8 @@ function getMissing(config) {
         return acc;
     }
     const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
-    answers.configure('prompts', prompts);
-    return answers.get().then((c) => {
+    _answers.configure('prompts', prompts);
+    return _answers.get().then((c) => {
         c._ = _.isEmpty(targetNames) ? c._ : targetNames;
         return c;
     });
@@ -111,8 +111,8 @@ function Targets(options = {}) {
     const answers = Answers({ name });
 
     function augment(config = {}) {
-        config.targets = targets;
-        config.answers = answers;
+        config._targets = targets;
+        config._answers = answers;
         return config;
     }
 
