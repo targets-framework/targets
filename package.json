@@ -1,6 +1,6 @@
 {
   "name": "targets",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Node.js CLI bootstrapper powered by minimist and inquirer",
   "bin": {
     "targets": "targets"
