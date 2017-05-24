@@ -63,8 +63,8 @@ function getConfig(options = {}) {
         const targetNames = config._;
         function promptReducer(acc, targetName) {
             const namespace = targetName.split('.').shift();
-            const target = _.result(targets, targetName, {});
-            const allTargetPrompts = _.result(target, 'prompts', []);
+            const target = targets[targetName] || {};
+            const allTargetPrompts = target.prompts || [];
             const targetPrompts = _.map(allTargetPrompts, (prompt) => {
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
                 return prompt;
@@ -73,6 +73,7 @@ function getConfig(options = {}) {
             return acc;
         }
         const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
+            debugger;
         answers.configure('prompts', prompts);
         return answers.get().then((c) => {
             c._ = _.isEmpty(targetNames) ? c._ : targetNames;
