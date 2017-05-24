@@ -19,49 +19,49 @@ function handleStream(stream, target) {
     stream.on('error', console.error);
 }
 
+function getChoices(config) {
+    const { targets } = config;
+    const getterPairs = _.toPairs(targets);
+    return _.map(getterPairs, (pair) => {
+        const getter = pair[1];
+        const getterKey = pair[0];
+        const option = {
+            name: getter.label || getter.name,
+            value: getterKey
+        };
+        return option;
+    });
+}
+
+function getInitialPrompt(config) {
+    if (_.isEmpty(config._)) {
+        let prompts = [
+            {
+                type: 'checkbox',
+                name: 'targetNames',
+                message: 'What information would you like to see?',
+                choices: getChoices(config)
+            }
+        ];
+        return inquirer.prompt(prompts)
+            .then((answers) => {
+                config._ = answers.targetNames;
+                return config;
+            });
+    } else {
+        return config;
+    }
+}
+
 function getConfig(options = {}) {
 
     const { name, targets } = options;
     const answers = Answers({ name });
 
-    function getChoices(config) {
-        const { targets } = config;
-        const getterPairs = _.toPairs(targets);
-        return _.map(getterPairs, (pair) => {
-            const getter = pair[1];
-            const getterKey = pair[0];
-            const option = {
-                name: getter.label || getter.name,
-                value: getterKey
-            };
-            return option;
-        });
-    }
-
-    function getInitialPrompt(config) {
-        if (_.isEmpty(config._)) {
-            let prompts = [
-                {
-                    type: 'checkbox',
-                    name: 'targetNames',
-                    message: 'What information would you like to see?',
-                    choices: getChoices(config)
-                }
-            ];
-            return inquirer.prompt(prompts)
-                .then((answers) => {
-                    config._ = answers.targetNames;
-                    return config;
-                });
-        } else {
-            return config;
-        }
-    }
-
     function getMissing(config) {
         const { targets } = config;
         const targetNames = config._;
-        const prompts = _.uniqBy(_.reduce(targetNames, (acc, targetName) => {
+        function promptReducer(acc, targetName) {
             const namespace = targetName.split('.').shift();
             const targetPrompts = _.map(targets[targetName].prompts, (prompt) => {
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
@@ -69,7 +69,8 @@ function getConfig(options = {}) {
             });
             acc = acc.concat(targetPrompts);
             return acc;
-        }, []), 'name');
+        }
+        const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
         answers.configure('prompts', prompts);
         return answers.get().then((c) => {
             c._ = _.isEmpty(targetNames) ? c._ : targetNames;
