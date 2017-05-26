@@ -9,8 +9,8 @@ const Promise = require('bluebird');
 const Answers = require('answers');
 const inquirer = require('inquirer');
 
-function handleStream(stream, target) {
-    const prefix = `[${chalk.yellow(target.label || target.name)}] `;
+function handleStream(stream, target, targetName) {
+    const prefix = `[${chalk.yellow(target.label || targetName)}] `;
     console.log(`${prefix}listening`);
     const lineWrapper = new LineWrapper({ prefix });
     stream.stdout.pipe(lineWrapper).pipe(process.stdout);
@@ -25,7 +25,7 @@ function getChoices(config) {
         const getter = pair[1];
         const getterKey = pair[0];
         const option = {
-            name: getter.label || getter.name,
+            name: getter.label || getterKey,
             value: getterKey
         };
         return option;
@@ -59,10 +59,10 @@ function invokeSequentialTargets(config) {
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let pendingResult = Promise.resolve(target(config))
+            let pendingResult = Promise.resolve(target(config[targetName] || {}))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
-                        handleStream(result, target);
+                        handleStream(result, target, targetName);
                         return { _targets, targetName, result: null };
                     } else {
                         return { _targets, targetName, result };
@@ -80,12 +80,11 @@ function invokeSequentialTargets(config) {
 
     const pendingTargets = _.reduce(targetNames, targetReducer, []);
 
-
     return Promise.each(pendingTargets, print);
 }
 
 function print(data) {
-    if (data) console.log(`[${chalk.yellow(data._targets[data.targetName].label || data._targets[data.targetName].name)}]`, data.result.split('\n').join(`\n[${chalk.yellow(data.targetName)}] `));
+    if (data) console.log(`[${chalk.yellow(data._targets[data.targetName].label || data.targetName)}]`, data.result.split('\n').join(`\n[${chalk.yellow(data.targetName)}] `));
     return;
 }
 
@@ -96,10 +95,10 @@ function invokeParallelTargets(config) {
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let pendingResult = Promise.resolve(target(config))
+            let pendingResult = Promise.resolve(target(config[targetName] || {}))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
-                        handleStream(result, target);
+                        handleStream(result, target, targetName);
                         return { _targets, targetName, result: null };
                     } else {
                         return { _targets, targetName, result };
@@ -129,7 +128,19 @@ function getMissing(config) {
         const target = _targets[targetName] || {};
         const allTargetPrompts = target.prompts || [];
         const targetPrompts = _.map(allTargetPrompts, (prompt) => {
-            _.set(prompt, 'name', `${namespace}.${prompt.name}`);
+            if (_.isObject(prompt)) {
+                if (!prompt.type) prompt.type = "input";
+                _.set(prompt, 'name', `${namespace}.${prompt.name}`);
+            } else if (_.isString(prompt)) {
+                let name = `${namespace}.${prompt}`;
+                prompt = {
+                    type: 'input',
+                    name,
+                    message: name
+                };
+            } else {
+                throw new Error(`invalid prompt in ${targetName}`);
+            }
             return prompt;
         });
         acc = acc.concat(targetPrompts);

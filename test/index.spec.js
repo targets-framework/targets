@@ -57,8 +57,16 @@ describe('Targets', () => {
             });
         });
         it('should be invoked with options from answers', () => {
+            const fooOptions = {
+                fooProp: "fooValue"
+            };
+            const barOptions = {
+                barProp: "barValue"
+            };
             const answers = {
-                _: [ 'foo', 'bar' ]
+                _: [ 'foo', 'bar' ],
+                foo: fooOptions,
+                bar: barOptions
             };
             const { Targets } = setup({ answers });
             const foo = sandbox.stub().returns("foo");
@@ -66,8 +74,8 @@ describe('Targets', () => {
             const bar = sandbox.stub().returns("bar");
             bar.label = "Bar";
             return Targets({ targets: { foo, bar } }).then(() => {
-                expect(foo).to.have.been.calledWith(sinon.match.has('_', [ 'foo', 'bar' ]));
-                expect(bar).to.have.been.calledWith(sinon.match.has('_', [ 'foo', 'bar' ]));
+                expect(foo).to.have.been.calledWith(fooOptions);
+                expect(bar).to.have.been.calledWith(barOptions);
             });
         });
         it('should report undefined if they reject', () => {
@@ -92,7 +100,7 @@ describe('Targets', () => {
             const foo = sandbox.stub().resolves('bar');
             sandbox.spy(console, 'log');
             return Targets({ targets: { foo } }).then(() => {
-                expect(console.log).to.have.been.calledWith(sinon.match(/proxy/), sinon.match.any);
+                expect(console.log).to.have.been.calledWith(sinon.match(/foo/), sinon.match.any);
             });
         });
         it('should log if target not found', () => {

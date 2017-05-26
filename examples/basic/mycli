@@ -15,13 +15,11 @@ function foo() {
  * a may have a prompts property which contains `inquirer` prompts for the target.
  */
 function greet(options) {
-    let name = options.name || "World";
-    return Promise.resolve(`Hello, ${name}!`);
+    return Promise.resolve(`Hello, ${options.name}!`);
 }
 greet.label = "greet example";
 greet.prompts = [
     {
-        type: 'input',
         name: "name",
         message: "What's your name?",
         default: "World"

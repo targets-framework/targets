@@ -2,97 +2,25 @@
 
 > a task composition framework
 
-[![Version](https://img.shields.io/npm/v/targets.svg)]()
-[![Travis](https://img.shields.io/travis/machellerogden/targets.svg)]()
-[![License](https://img.shields.io/npm/l/targets.svg)]()
+[![Version](https://img.shields.io/npm/v/targets.svg)]() [![Travis](https://img.shields.io/travis/machellerogden/targets.svg)]() [![License](https://img.shields.io/npm/l/targets.svg)]()
 
-## Usage
+## Overview
 
-Targets is very good for building information gathering and task running CLIs.
-It's easiest to learn how it work by simply using it. Complete the following
-exercise to get started.
+Targets is a framework for building information gathering tools, task runners and build/deploy CLIs inspired by GNU Make.
 
-## Example: A basic CLI using targets.
+Make was the original build tool. It was designed to make configuring, compiling, testing, debugging and running C code easier. It is deep coupled to C. Targets on the other hand has nothing to do with C, or any other language. Targets is an attempt to take the best ideas from Make around how to compose tasks and how to source config, to improve upon and modernize these basic ideas while avoiding language-specific arcana in the implementation.
 
-#### Save targets as a dependency to your package
+By the way, tasks are called "targets" in Make documentation, hence the name of this module.
+
+## Install
 
 ```text
 npm install --save targets
 ```
 
-#### Copy the following to a file called `./mycli`.
+## Usage
 
-```js
-#!/usr/bin/env node
-'use strict';
-
-const Targets = require('targets');
-
-/**
- * The most basic possible target is simply a named function.
- */
-function foo() {
-    return "bar";
-}
-
-/**
- * A more complete target should may return a promise, has a label property and
- * a may have a prompts property which contains `inquirer` prompts for the target.
- */
-function greet(options) {
-    let name = options.greet.name || "World";
-    return Promise.resolve(`Hello, ${name}!`);
-}
-greet.label = "greet example";
-greet.prompts = [
-    {
-        type: 'input',
-        name: "name",
-        message: "What's your name?",
-        default: "World"
-    }
-];
-
-/**
- * Register targets
- */
-Targets({
-    targets: {
-        greet,
-        foo
-    }
-});
-```
-
-#### Make it executable.
-
-```text
-chmod +x ./mycli
-```
-
-#### Run
-
-```text
-./mycli
-```
-
-When you run your tool without arguments and you'll be prompted for any registered targets, if those targets have prompts you'll receive those as well.
-
-```text
-./mycli greet --greet.name=Bob
-```
-
-When you run your tool with the target name and options, your target will run with those options.
-
-```text
-./mycli foo greet --greet.name=Bob
-```
-
-When you run your tool with multiple target names and options, all specified targets will run with those options.
-
-## Advanced Example
-
-Review the `./examples/advanced` directory for a more comprehensive example.
+Targets is best explained by example. To get started, see [TUTORIAL.md](https://github.com/machellerogden/targets/blob/master/TUTORIAL.md).
 
 ## License
 

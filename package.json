@@ -26,6 +26,7 @@
     "stream-line-wrapper": "^0.1.1"
   },
   "devDependencies": {
+    "axios": "^0.16.1",
     "bytes": "^2.5.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
