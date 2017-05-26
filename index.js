@@ -84,7 +84,7 @@ function invokeSequentialTargets(config) {
 }
 
 function print(data) {
-    if (data) console.log(`[${chalk.yellow(data._targets[data.targetName].label || data.targetName)}]`, data.result.split('\n').join(`\n[${chalk.yellow(data.targetName)}] `));
+    if (data && data.result) console.log(`[${chalk.yellow(data._targets[data.targetName].label || data.targetName)}]`, data.result.split('\n').join(`\n[${chalk.yellow(data.targetName)}] `));
     return;
 }
 

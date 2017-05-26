@@ -201,9 +201,77 @@ The order of config precedence, from highest to lowest precedence, is as follows
 
 All configs will be deeply merged so that one can extend upon another.
 
-The logic which handles this config cascade comes from the brilliant [rc](https://github.com/dominictarr/rc) module by [Dominic Tarr](https://github.com/dominictarr), but it has been modified and reimplemented in my [answers](https://www.npmjs.com/package/answers) module in order to handle the deep config merging in a manner which is more suitable for task composition. More on that later...
+The logic which handles this config cascade comes from the brilliant [rc](https://github.com/dominictarr/rc) module by [Dominic Tarr](https://github.com/dominictarr), but it has been modified and reimplemented in my [answers](https://www.npmjs.com/package/answers) module in order to handle the deep config merging in a manner which is more suitable for task composition.
 
-Now that you understand where config comes from and how to declare your Targets config requirements as prompts, let's take a look at more advanced way to define and compose your targets.
+To understand how config gets merged, let's do another quick exercise.
+
+Let's start by adding a `logger` target to our CLI which simple prints out the options which it is provided with.
+
+```js
+#!/usr/bin/env node
+'use strict';
+
+function logger(options) {
+    return JSON.stringify(options, null, 4);
+}
+
+require('targets')({ targets: { logger } });
+```
+
+To test that it's working, run `./mycli logger --logger.foo`. You should see the following output.
+
+
+```text
+./mycli logger --logger.foo
+[logger] {
+[logger]     "foo": true
+[logger] }
+```
+
+Now, create a `./.myclirc` in your project directory which contains the following:
+
+```js
+{
+    "logger": {
+        "collection": [
+            {
+                "name": "foo"
+            },
+            {
+                "name": "foo"
+            },
+            {
+                "name": "foo"
+            }
+        ]
+    }
+}
+```
+
+Run `./mycli logger --logger.collection[2].name="bar"`. You should see this output.
+
+```text
+./mycli logger
+[logger] {
+[logger]     "collection": [
+[logger]         {
+[logger]             "name": "foo"
+[logger]         },
+[logger]         {
+[logger]             "name": "foo"
+[logger]         },
+[logger]         {
+[logger]             "name": "bar"
+[logger]         }
+[logger]     ]
+[logger] }
+```
+
+Take a moment to review what just happened. You were able to override a specific item within the collection defined inside your project's config file from the command line without affecting any of the other config from that file. This is a very powerful idea. There will be times you will find you need the ability to override a deeply nested property within your config, and Targets let's you do it with surgical precision.
+
+I'd like to give credit for this ability to reach deeply into the config in this manner to [keypather](https://www.npmjs.com/package/keypather) by [Tejesh Mehta](https://github.com/tjmehta). I've enhanced keypather within [answers](https://www.npmjs.com/package/answers) to work recursively through keypathed properties, but the core piece of functionality that makes this possible was all Tejesh's masterful work.
+
+Now that you understand where config comes from, and how to declare your Targets config requirements as prompts, let's take a look at more advanced way to define and compose your targets.
 
 Targets can be defined as Promises. Consider the following.
 
@@ -262,6 +330,28 @@ If we want targets to be invoked sequentially, use commas to separate the target
 [foo] bar
 ```
 
+Targets can also be defined as streams. Consider the following.
+
+```js
+'use strict';
+
+function tcpdump() {
+    return require('child_process').spawn('tcpdump', ['-i', 'en0', '-n', '-s', '0']);
+}
+
+require('targets')({ targets: { tcpdump } });
+```
+
+Now, when we run `sudo ./mycli tcpdump` the output from tcpdump is streamed to the console.
+
+```text
+sudo ./mycli tcpdump
+[tcpdump] output here...
+[tcpdump] output here...
+[tcpdump] output here...
+[tcpdump] output here...
+[tcpdump] output here...
+```
 
 ### Recommended Project Structure / Bootstrapping
 
