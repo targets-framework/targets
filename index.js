@@ -7,7 +7,6 @@ const EventEmitter = require('events').EventEmitter;
 const LineWrapper = require('stream-line-wrapper');
 const Promise = require('bluebird');
 const Answers = require('answers');
-const printResults = require('./lib/printResults');
 const inquirer = require('inquirer');
 
 function handleStream(stream, target) {
@@ -53,40 +52,78 @@ function getInitialPrompt(config) {
     }
 }
 
-function invokeTargets(config) {
+function invokeSequentialTargets(config) {
     const { _targets } = config;
-    const targetNames = config._;
+    const targetNames = config._forks.sequential;
 
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let targetResponse = target(config);
-            if (targetResponse instanceof EventEmitter) {
-                handleStream(targetResponse, target);
-                acc[targetName] = Promise.resolve(null);
-            } else {
-                acc[targetName] = Promise.resolve(targetResponse).catch(() => 'unavailable');
-            }
+            let pendingResult = Promise.resolve(target(config))
+                .then((result) => {
+                    if (result instanceof EventEmitter) {
+                        handleStream(result, target);
+                        return { _targets, targetName, result: null };
+                    } else {
+                        return { _targets, targetName, result };
+                    }
+                })
+                .catch(() => {
+                    return { _targets, targetName, result: 'unavailable' };
+                });
+            acc.push(pendingResult);
         } else {
             console.log('no target found');
         }
         return acc;
     }
 
-    const pendingTargets = _.reduce(targetNames, targetReducer, {});
+    const pendingTargets = _.reduce(targetNames, targetReducer, []);
 
-    function addResults(results) {
-        config.results = results;
-        return config;
+
+    return Promise.each(pendingTargets, print);
+}
+
+function print(data) {
+    if (data) console.log(`[${chalk.yellow(data._targets[data.targetName].label || data._targets[data.targetName].name)}]`, data.result.split('\n').join(`\n[${chalk.yellow(data.targetName)}] `));
+    return;
+}
+
+function invokeParallelTargets(config) {
+    const { _targets } = config;
+    const targetNames = config._forks.parallel;
+
+    function targetReducer(acc, targetName) {
+        const target = _targets[targetName];
+        if (_.isFunction(target)) {
+            let pendingResult = Promise.resolve(target(config))
+                .then((result) => {
+                    if (result instanceof EventEmitter) {
+                        handleStream(result, target);
+                        return { _targets, targetName, result: null };
+                    } else {
+                        return { _targets, targetName, result };
+                    }
+                })
+                .catch(() => {
+                    return { _targets, targetName, result: 'unavailable' };
+                })
+                .then(print);
+            acc.push(pendingResult);
+        } else {
+            console.log('no target found');
+        }
+        return acc;
     }
 
-    return Promise.props(pendingTargets)
-        .then(addResults);
+    const pendingTargets = _.reduce(targetNames, targetReducer, []);
+
+    return Promise.all(pendingTargets);
 }
 
 function getMissing(config) {
     const { _targets, _answers } = config;
-    const targetNames = config._;
+    const targetNames = flattenTargetNames(config._);
     function promptReducer(acc, targetName) {
         const namespace = targetName.split('.').shift();
         const target = _targets[targetName] || {};
@@ -101,9 +138,31 @@ function getMissing(config) {
     const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
     _answers.configure('prompts', prompts);
     return _answers.get().then((c) => {
-        c._ = _.isEmpty(targetNames) ? c._ : targetNames;
-        return c;
+        c._ = _.isEmpty(config._) ? c._ : config._;
+        return forkTargets(c);
     });
+}
+
+function flattenTargetNames(targetNames) {
+    return _.reduce(targetNames, (acc, targetName) => [ ...acc, ...targetName.split(',') ], []);
+}
+
+function forkTargets(config) {
+    const targets = _.reduce(config._, (acc, targetName) => {
+        if (targetName.indexOf(',') >= 0) {
+            acc.sequential = [ ...acc.sequential, ...targetName.split(',') ];
+        } else {
+            acc.parallel.push(targetName);
+        }
+        return acc;
+    }, { sequential: [], parallel: [] });
+
+    config._forks = {
+        parallel: targets.parallel,
+        sequential: targets.sequential
+    };
+
+    return config;
 }
 
 function Targets(options = {}) {
@@ -116,14 +175,31 @@ function Targets(options = {}) {
         return config;
     }
 
+    function invokeTargets(config) {
+        const chains = [];
+
+        if (!_.isEmpty(config._forks.parallel)) {
+            chains.push(Promise.resolve(config)
+                .then(invokeParallelTargets)
+                .catch(console.error));
+        }
+
+        if (!_.isEmpty(config._forks.sequential)) {
+            chains.push(Promise.resolve(config)
+                .then(invokeSequentialTargets)
+                .catch(console.error));
+        }
+
+        return Promise.all(chains);
+    }
+
     return answers.get()
         .then(augment)
         .then(getInitialPrompt)
         .then(getMissing)
         .then(augment)
-        .then(invokeTargets)
-        .then(printResults)
-        .catch(console.error);
+        .then(invokeTargets);
+
 }
 
 module.exports = Targets;
