@@ -59,7 +59,8 @@ function invokeSequentialTargets(config) {
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let pendingResult = Promise.resolve(target(config[targetName] || {}))
+            let ns = targetName.split('.').shift();
+            let pendingResult = Promise.resolve(target(config[ns] || {}))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
                         handleStream(result, target, targetName);
@@ -99,7 +100,8 @@ function invokeParallelTargets(config) {
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let pendingResult = Promise.resolve(target(config[targetName] || {}))
+            let ns = targetName.split('.').shift();
+            let pendingResult = Promise.resolve(target(config[ns] || {}))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
                         handleStream(result, target, targetName);
