@@ -85,7 +85,10 @@ function invokeSequentialTargets(config) {
 
 function print(data) {
     const label = data._targets[data.targetName].label || data.targetName;
-    if (data && data.result) console.log(`[${chalk.yellow(label)}]`, data.result.split('\n').join(`\n[${chalk.yellow(label)}] `));
+    if (data && data.result) {
+        const result = (_.isString(data.result)) ? data.result : JSON.stringify(data.result, null, 4);
+        console.log(`[${chalk.yellow(label)}]`, result.split('\n').join(`\n[${chalk.yellow(label)}] `));
+    }
     return;
 }
 
