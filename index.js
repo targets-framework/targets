@@ -181,6 +181,18 @@ function Targets(options = {}) {
     const { name, targets } = options;
     const answers = Answers({ name });
 
+    function processGroups(config = {}) {
+        config._ = _.reduce(config._, (acc, targetName) => {
+            const target = targets[targetName]; 
+            if (_.isArray(target)) {
+                return [ ...acc, ...target ];
+            } else {
+                return [ ...acc, targetName ];
+            }
+        }, []);
+        return config;
+    }
+
     function augment(config = {}) {
         config._targets = targets;
         config._answers = answers;
@@ -206,6 +218,7 @@ function Targets(options = {}) {
     }
 
     return answers.get()
+        .then(processGroups)
         .then(augment)
         .then(getInitialPrompt)
         .then(getMissing)
