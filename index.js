@@ -38,7 +38,7 @@ function getInitialPrompt(config) {
             {
                 type: 'checkbox',
                 name: 'targetNames',
-                message: 'What information would you like to see?',
+                message: 'Please select your targets',
                 choices: getChoices(config)
             }
         ];
@@ -190,14 +190,23 @@ function Targets(options = {}) {
     const answers = Answers({ name });
 
     function processGroups(config = {}) {
-        config._ = _.reduce(config._, (acc, targetName) => {
-            const target = targets[targetName]; 
-            if (_.isArray(target)) {
-                return [ ...acc, ...target ];
-            } else {
-                return [ ...acc, targetName ];
-            }
-        }, []);
+        if (_.isEmpty(config._)) {
+            _.each(targets, (target, prop) => {
+                if (_.isArray(target)) {
+                    delete targets[prop];
+                }
+            });
+        } else {
+            config._ = _.reduce(config._, (acc, targetName) => {
+                const target = targets[targetName]; 
+                if (_.isArray(target)) {
+                    const result = [ ...acc, ...target ];
+                    return result;
+                } else {
+                    return [ ...acc, targetName ];
+                }
+            }, []);
+        }
         return config;
     }
 
