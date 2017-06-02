@@ -59,8 +59,8 @@ function invokeSequentialTargets(config) {
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let ns = targetName.split('.').shift();
-            let pendingResult = Promise.resolve(target(config[ns] || {}))
+            let namespace = targetName.split('.').shift();
+            let pendingResult = Promise.resolve(target(config[namespace] || {}))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
                         handleStream(result, target, targetName);
@@ -100,8 +100,8 @@ function invokeParallelTargets(config) {
     function targetReducer(acc, targetName) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
-            let ns = targetName.split('.').shift();
-            let pendingResult = Promise.resolve(target(config[ns] || {}))
+            let namespace = targetName.split('.').shift();
+            let pendingResult = Promise.resolve(target(config[namespace] || {}))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
                         handleStream(result, target, targetName);
@@ -132,7 +132,10 @@ function getMissing(config) {
     function promptReducer(acc, targetName) {
         const namespace = targetName.split('.').shift();
         const target = _targets[targetName] || {};
-        const allTargetPrompts = target.prompts || [];
+        let allTargetPrompts = target.prompts || [];
+        if (_.isFunction(allTargetPrompts)) {
+            allTargetPrompts = allTargetPrompts(config[namespace]);
+        }
         const targetPrompts = _.map(allTargetPrompts, (prompt) => {
             if (_.isObject(prompt)) {
                 if (!prompt.type) prompt.type = "input";
