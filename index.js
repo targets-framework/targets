@@ -140,6 +140,7 @@ function getMissing(config) {
             if (_.isObject(prompt)) {
                 if (!prompt.type) prompt.type = "input";
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
+                _.set(prompt, 'message', `[${chalk.yellow(target.label || target.name)}] ${prompt.message}`);
             } else if (_.isString(prompt)) {
                 let name = `${namespace}.${prompt}`;
                 prompt = {
