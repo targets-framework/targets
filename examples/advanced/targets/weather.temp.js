@@ -14,7 +14,7 @@ function getTemp(results) {
 
 function weather(answers) {
     const options = {
-        search: answers.weather.location,
+        search: answers.location,
         degreeType: 'F'
     };
     return Promise.promisify(weatherJs.find)(options)
