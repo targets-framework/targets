@@ -60,7 +60,7 @@ function invokeSequentialTargets(config) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
-            let targetOptions = Promise.resolve({ _targets, target, targetName, config: (config[namespace] || {}) });
+            let targetOptions = { _targets, target, targetName, config: (config[namespace] || {}) };
             acc.push(targetOptions);
         } else {
             console.log('no target found');
@@ -71,7 +71,7 @@ function invokeSequentialTargets(config) {
     const targetOptions = _.reduce(targetNames, targetReducer, []);
 
     return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, config }) => {
-        return target(config, acc).then((result) => {
+        return Promise.resolve(target(config, acc)).then((result) => {
             if (result instanceof EventEmitter) {
                 handleStream(result, target, targetName);
                 return { _targets, targetName, result: null };
