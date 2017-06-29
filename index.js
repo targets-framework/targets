@@ -60,28 +60,34 @@ function invokeSequentialTargets(config) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
-            let pendingResult = Promise.resolve(target(config[namespace] || {}))
-                .then((result) => {
-                    if (result instanceof EventEmitter) {
-                        handleStream(result, target, targetName);
-                        return { _targets, targetName, result: null };
-                    } else {
-                        return { _targets, targetName, result };
-                    }
-                })
-                .catch(() => {
-                    return { _targets, targetName, result: 'unavailable' };
-                });
-            acc.push(pendingResult);
+            let targetOptions = Promise.resolve({ _targets, target, targetName, config: (config[namespace] || {}) });
+            acc.push(targetOptions);
         } else {
             console.log('no target found');
         }
         return acc;
     }
 
-    const pendingTargets = _.reduce(targetNames, targetReducer, []);
+    const targetOptions = _.reduce(targetNames, targetReducer, []);
 
-    return Promise.each(pendingTargets, print);
+    return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, config }) => {
+        return target(config, acc).then((result) => {
+            if (result instanceof EventEmitter) {
+                handleStream(result, target, targetName);
+                return { _targets, targetName, result: null };
+            } else {
+                return { _targets, targetName, result };
+            }
+        })
+        .catch((e) => {
+            if (process.env.DEBUG) console.error(e);
+            return { _targets, targetName, result: 'unavailable' };
+        }).then((result) => {
+            acc = { targetName, result: result.result };
+            print(result);
+            return acc;
+        });
+    }, null);
 }
 
 function print(data) {
