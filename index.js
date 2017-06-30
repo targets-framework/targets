@@ -63,7 +63,7 @@ function invokeSequentialTargets(config) {
             let targetOptions = { _targets, target, targetName, config: (config[namespace] || {}) };
             acc.push(targetOptions);
         } else {
-            console.log('no target found');
+            console.log(`[${chalk.yellow("Target Not Found")}]`, targetName);
         }
         return acc;
     }
