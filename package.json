@@ -14,10 +14,13 @@
     "type": "git",
     "url": "https://github.com/machellerogden/targets.git"
   },
-  "author": "",
+  "author": {
+      "name": "Mac Heller-Ogden",
+      "email": "mac@machellerogden.com"
+  },
   "license": "Apache-2.0",
   "dependencies": {
-    "answers": "1.2.6",
+    "answers": "1.2.7",
     "bluebird": "3.5.0",
     "chalk": "1.1.3",
     "inquirer": "3.0.6",
