@@ -1,6 +1,6 @@
 {
   "name": "targets",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Node.js CLI bootstrapper powered by minimist and inquirer",
   "main": "index.js",
   "scripts": {
@@ -15,8 +15,8 @@
     "url": "https://github.com/machellerogden/targets.git"
   },
   "author": {
-      "name": "Mac Heller-Ogden",
-      "email": "mac@machellerogden.com"
+    "name": "Mac Heller-Ogden",
+    "email": "mac@machellerogden.com"
   },
   "license": "Apache-2.0",
   "dependencies": {
