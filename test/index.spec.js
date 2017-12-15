@@ -113,7 +113,7 @@ describe('Targets', () => {
                 expect(console.log).to.have.been.calledWith("no target found");
             });
         });
-        it('should have any prompts which they define added to the main prompts', () => {
+        it('should have any prompts which they define added to the main prompts but prefixed with namespace', () => {
             const answers = {
                 _: [ 'foo' ]
             };
@@ -130,7 +130,15 @@ describe('Targets', () => {
             ];
             return Targets({ targets: { foo } }).then(() => {
                 expect(answersStub.configure).to.have.been.called;
-                expect(answersStub.configure).to.have.been.calledWith('prompts', sinon.match(foo.prompts));
+                console.log(foo.prompts);
+                expect(answersStub.configure).to.have.been.calledWith('prompts', sinon.match([
+                    {
+                        type: 'input',
+                        message: sinon.match.string,
+                        name: "foo.bar",
+                        default: "Bar"
+                    }
+                ]));
             });
         });
     });

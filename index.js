@@ -8,6 +8,7 @@ const LineWrapper = require('stream-line-wrapper');
 const Promise = require('bluebird');
 const Answers = require('answers');
 const inquirer = require('inquirer');
+const cloneDeep = require('clone-deep');
 
 function handleStream(stream, target, targetName) {
     const prefix = `[${chalk.yellow(target.label || targetName)}] `;
@@ -145,7 +146,7 @@ function getMissing(config) {
     function promptReducer(acc, targetName) {
         const namespace = targetName.split('.').shift();
         const target = _targets[targetName] || {};
-        let allTargetPrompts = target.prompts || [];
+        let allTargetPrompts = cloneDeep(target.prompts) || [];
         if (_.isFunction(allTargetPrompts)) {
             allTargetPrompts = allTargetPrompts(config[namespace]);
         }
@@ -171,7 +172,8 @@ function getMissing(config) {
         acc = acc.concat(targetPrompts);
         return acc;
     }
-    const prompts = _.uniqBy(_.reduce(targetNames, promptReducer, []), 'name');
+    const allPrompts = _.reduce(targetNames, promptReducer, []);
+    const prompts = _.uniqBy(allPrompts, 'name');
     _answers.configure('prompts', prompts);
     return _answers.get().then((c) => {
         c._ = _.isEmpty(config._) ? c._ : config._;
