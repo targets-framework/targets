@@ -153,7 +153,9 @@ function getMissing(config) {
             if (_.isObject(prompt)) {
                 if (!prompt.type) prompt.type = "input";
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
-                _.set(prompt, 'message', `[${chalk.yellow(target.label || target.name)}] ${prompt.message}`);
+                const prefix = `[${chalk.yellow(target.label || target.name)}]`;
+                const message = _.get(prompt, 'message');
+                _.set(prompt, 'message', ((typeof message === 'function') ? (answers) => (`${prefix} ${message(answers[namespace])}`) : `${prefix} ${message}`));
             } else if (_.isString(prompt)) {
                 let name = `${namespace}.${prompt}`;
                 prompt = {
