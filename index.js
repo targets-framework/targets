@@ -61,7 +61,8 @@ function invokeSequentialTargets(config) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
-            let targetOptions = { _targets, target, targetName, config: (config[namespace] || {}) };
+            let targetConfig = _.assign({}, (config.common || {}),(config[namespace] || {}));
+            let targetOptions = { _targets, target, targetName, targetConfig };
             acc.push(targetOptions);
         } else {
             console.log(`[${chalk.yellow("Target Not Found")}]`, targetName);
@@ -71,16 +72,15 @@ function invokeSequentialTargets(config) {
 
     const targetOptions = _.reduce(targetNames, targetReducer, []);
 
-    return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, config }) => {
-        return Promise.resolve(target(config, acc)).then((result) => {
+    return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, targetConfig }) => {
+        return Promise.resolve(target(targetConfig, acc)).then((result) => {
             if (result instanceof EventEmitter) {
                 handleStream(result, target, targetName);
                 return { _targets, targetName, result: null };
             } else {
                 return { _targets, targetName, result };
             }
-        })
-        .catch((e) => {
+        }).catch((e) => {
             if (process.env.DEBUG) console.error(e);
             return { _targets, targetName, result: 'unavailable' };
         }).then((result) => {
@@ -115,7 +115,8 @@ function invokeParallelTargets(config) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
-            let pendingResult = Promise.resolve(target(config[namespace] || {}))
+            let targetConfig = _.assign({}, (config.common || {}),(config[namespace] || {}));
+            let pendingResult = Promise.resolve(target(targetConfig))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
                         handleStream(result, target, targetName);
@@ -150,14 +151,17 @@ function getMissing(config) {
         if (_.isFunction(allTargetPrompts)) {
             allTargetPrompts = allTargetPrompts(config[namespace]);
         }
-        const targetPrompts = _.map(allTargetPrompts, (prompt) => {
+        const targetPrompts = _.reduce(allTargetPrompts, (remainingPrompts, prompt) => {
+            let originalPromptName;
             if (_.isObject(prompt)) {
                 if (!prompt.type) prompt.type = "input";
+                originalPromptName = prompt.name;
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
                 const prefix = `[${chalk.yellow(target.label || target.name)}]`;
                 const message = _.get(prompt, 'message');
                 _.set(prompt, 'message', ((typeof message === 'function') ? (answers) => (`${prefix} ${message(answers[namespace])}`) : `${prefix} ${message}`));
             } else if (_.isString(prompt)) {
+                originalPromptName = prompt;
                 let name = `${namespace}.${prompt}`;
                 prompt = {
                     type: 'input',
@@ -167,10 +171,9 @@ function getMissing(config) {
             } else {
                 throw new Error(`invalid prompt in ${targetName}`);
             }
-            return prompt;
-        });
-        acc = acc.concat(targetPrompts);
-        return acc;
+            return ((config.common || {})[originalPromptName]) ? remainingPrompts : [ ...remainingPrompts, prompt ];
+        }, []);
+        return [ ...acc, ...targetPrompts ];
     }
     const allPrompts = _.reduce(targetNames, promptReducer, []);
     const prompts = _.uniqBy(allPrompts, 'name');
@@ -210,7 +213,7 @@ function Targets(options = {}) {
     function processGroups(config = {}) {
         if (_.isEmpty(config._)) {
             _.each(targets, (target, prop) => {
-                if (_.isArray(target)) {
+                if (_.isArray(target) || _.isString(target)) {
                     delete targets[prop];
                 }
             });
@@ -219,6 +222,9 @@ function Targets(options = {}) {
                 const target = targets[targetName]; 
                 if (_.isArray(target)) {
                     const result = [ ...acc, ...target ];
+                    return result;
+                } else if (_.isString(target)) {
+                    const result = [ ...acc, target ];
                     return result;
                 } else {
                     return [ ...acc, targetName ];
