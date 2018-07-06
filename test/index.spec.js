@@ -74,8 +74,8 @@ describe('Targets', () => {
             const bar = sandbox.stub().returns("bar");
             bar.label = "Bar";
             return Targets({ targets: { foo, bar } }).then(() => {
-                expect(foo).to.have.been.calledWith(fooOptions);
-                expect(bar).to.have.been.calledWith(barOptions);
+                expect(foo).to.have.been.calledWithMatch(fooOptions);
+                expect(bar).to.have.been.calledWithMatch(barOptions);
             });
         });
         it('should report undefined if they reject', () => {

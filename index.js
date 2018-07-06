@@ -53,6 +53,23 @@ function getInitialPrompt(config) {
     }
 }
 
+function TargetProxyHandler(config) {
+    return  {
+        get: (obj, prop) => {
+            return obj[prop] || config[prop];
+        },
+        has: (obj, prop) => {
+            return !!(obj[prop] || config[prop]);
+        },
+        ownKeys: (obj) => {
+            return [ ...new Set([ ...Object.keys(obj), ...Object.keys(config) ]) ];
+        },
+        getOwnPropertyDescriptor: () => {
+            return { enumerable: true, configurable: true };
+        }
+    };
+}
+
 function invokeSequentialTargets(config) {
     const { _targets } = config;
     const targetNames = config._forks.sequential;
@@ -61,8 +78,9 @@ function invokeSequentialTargets(config) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
-            let targetConfig = _.assign({}, (config.common || {}),(config[namespace] || {}));
-            let targetOptions = { _targets, target, targetName, targetConfig };
+            let targetConfig = config[namespace] || {};
+            let targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
+            let targetOptions = { _targets, target, targetName, targetConfigProxy };
             acc.push(targetOptions);
         } else {
             console.log(`[${chalk.yellow("Target Not Found")}]`, targetName);
@@ -115,8 +133,9 @@ function invokeParallelTargets(config) {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
-            let targetConfig = _.assign({}, (config.common || {}),(config[namespace] || {}));
-            let pendingResult = Promise.resolve(target(targetConfig))
+            let targetConfig = config[namespace] || {};
+            let targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
+            let pendingResult = Promise.resolve(target(targetConfigProxy))
                 .then((result) => {
                     if (result instanceof EventEmitter) {
                         handleStream(result, target, targetName);
@@ -147,9 +166,11 @@ function getMissing(config) {
     function promptReducer(acc, targetName) {
         const namespace = targetName.split('.').shift();
         const target = _targets[targetName] || {};
+        const targetConfig = config[namespace] || {};
+        const targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
         let allTargetPrompts = cloneDeep(target.prompts) || [];
         if (_.isFunction(allTargetPrompts)) {
-            allTargetPrompts = allTargetPrompts(config[namespace]);
+            allTargetPrompts = allTargetPrompts(targetConfig);
         }
         const targetPrompts = _.reduce(allTargetPrompts, (remainingPrompts, prompt) => {
             let originalPromptName;
@@ -157,7 +178,7 @@ function getMissing(config) {
                 if (!prompt.type) prompt.type = "input";
                 originalPromptName = prompt.name;
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
-                const prefix = `[${chalk.yellow(target.label || target.name)}]`;
+                const prefix = `[${chalk.yellow(namespace)}.${chalk.yellow(originalPromptName)}]`;
                 const message = _.get(prompt, 'message');
                 _.set(prompt, 'message', ((typeof message === 'function') ? (answers) => (`${prefix} ${message(answers[namespace])}`) : `${prefix} ${message}`));
             } else if (_.isString(prompt)) {
@@ -171,7 +192,7 @@ function getMissing(config) {
             } else {
                 throw new Error(`invalid prompt in ${targetName}`);
             }
-            return ((config.common || {})[originalPromptName]) ? remainingPrompts : [ ...remainingPrompts, prompt ];
+            return prompt.optional || targetConfigProxy[originalPromptName] ? remainingPrompts : [ ...remainingPrompts, prompt ];
         }, []);
         return [ ...acc, ...targetPrompts ];
     }
