@@ -12,11 +12,12 @@ function getSkytext(results) {
     }
 }
 
-function weather(answers) {
+function weather(answers, print) {
     const options = {
         search: answers.location,
         degreeType: 'F'
     };
+    print('How about that weather?');
     return Promise.promisify(weatherJs.find)(options)
         .then(getSkytext);
 }

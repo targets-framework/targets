@@ -1,22 +1,42 @@
 #!/usr/bin/env node
 'use strict';
 
+const os = require('os');
 const _ = require('lodash');
 const chalk = require('chalk');
 const EventEmitter = require('events').EventEmitter;
+const { ChildProcess } = require('child_process');
 const LineWrapper = require('stream-line-wrapper');
 const Promise = require('bluebird');
 const Answers = require('answers');
 const inquirer = require('inquirer');
 const cloneDeep = require('clone-deep');
 
+const ansiLabel = (label) => `${chalk.white('[')}${chalk.yellow(label)}${chalk.white(']')}`;
+
+const Printer = (label) => (value) => {
+    console.log(ansiLabel(label),
+        ((_.isString(value))
+            ? value
+            : JSON.stringify(value, null, 4))
+            .replace(new RegExp(`^${os.EOL}*`), '')
+            .replace(new RegExp(`${os.EOL}*$`), '')
+            .split(os.EOL)
+            .join(`\n${ansiLabel(label)} `));
+};
+
 function handleStream(stream, target, targetName) {
-    const prefix = `[${chalk.yellow(target.label || targetName)}] `;
-    console.log(`${prefix}listening`);
-    const lineWrapper = new LineWrapper({ prefix });
+    const label = ansiLabel(target.label || targetName);
+    console.log(label, 'listening');
+    const lineWrapper = new LineWrapper({ prefix: `${label} ` });
     stream.stdout.pipe(lineWrapper).pipe(process.stdout);
     stream.stderr.pipe(process.stderr);
-    stream.on('error', console.error);
+    return stream.then
+        ? stream
+        : new Promise((resolve, reject) => {
+            stream.on('error', (e) => { console.log('something bad happened', e); reject(e); });
+            stream.on('end', resolve);
+        });
 }
 
 function getChoices(config) {
@@ -83,45 +103,39 @@ function invokeSequentialTargets(config) {
             let targetOptions = { _targets, target, targetName, targetConfigProxy };
             acc.push(targetOptions);
         } else {
-            console.log(`[${chalk.yellow("Target Not Found")}]`, targetName);
+            console.log(ansiLabel('Target Not Found'), targetName);
         }
         return acc;
     }
 
     const targetOptions = _.reduce(targetNames, targetReducer, []);
 
-    return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, targetConfig }) => {
-        return Promise.resolve(target(targetConfig, acc)).then((result) => {
-            if (result instanceof EventEmitter) {
-                handleStream(result, target, targetName);
-                return { _targets, targetName, result: null };
-            } else {
-                return { _targets, targetName, result };
-            }
-        }).catch((e) => {
-            if (process.env.DEBUG) console.error(e);
-            return { _targets, targetName, result: 'unavailable' };
-        }).then((result) => {
-            acc = { targetName, result: result.result };
-            print(result);
-            return acc;
-        });
+    return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, targetConfigProxy }) => {
+        let returnValue = target(targetConfigProxy, Printer(target.label || targetName), acc);
+        if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
+            returnValue = handleStream(returnValue, target, targetName);
+        }
+        return Promise.resolve(returnValue)
+            .then((result) => {
+                if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
+                    return { _targets, targetName, result: null };
+                } else {
+                    return { _targets, targetName, result };
+                }
+            }).catch((e) => {
+                if (process.env.DEBUG) console.error(e);
+                return { _targets, targetName, result: 'unavailable' };
+            }).then((result) => {
+                acc = { targetName, result: result.result };
+                print(result);
+                return acc;
+            });
     }, null);
 }
 
 function print(data) {
     const label = data._targets[data.targetName].label || data.targetName;
-    if (data && data.result) {
-        let result;
-        if (_.isString(data.result)) {
-            result = data.result;
-        } else {
-            result = JSON.stringify(data.result, null, 4);
-        }
-        result = result.replace(/^\n*/, '');
-        result = result.replace(/\n*$/, '');
-        console.log(`[${chalk.yellow(label)}]`, result.split('\n').join(`\n[${chalk.yellow(label)}] `));
-    }
+    if (data && data.result) Printer(label)(data.result);
     return;
 }
 
@@ -135,10 +149,13 @@ function invokeParallelTargets(config) {
             let namespace = targetName.split('.').shift();
             let targetConfig = config[namespace] || {};
             let targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
-            let pendingResult = Promise.resolve(target(targetConfigProxy))
+            let returnValue = target(targetConfigProxy, Printer(target.label || targetName));
+            if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
+                returnValue = handleStream(returnValue, target, targetName);
+            }
+            let pendingResult = Promise.resolve(returnValue)
                 .then((result) => {
-                    if (result instanceof EventEmitter) {
-                        handleStream(result, target, targetName);
+                    if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
                         return { _targets, targetName, result: null };
                     } else {
                         return { _targets, targetName, result };
@@ -178,9 +195,13 @@ function getMissing(config) {
                 if (!prompt.type) prompt.type = "input";
                 originalPromptName = prompt.name;
                 _.set(prompt, 'name', `${namespace}.${prompt.name}`);
-                const prefix = `[${chalk.yellow(namespace)}.${chalk.yellow(originalPromptName)}]`;
+                const prefix = ansiLabel(`${namespace}.${originalPromptName}`);
                 const message = _.get(prompt, 'message');
-                _.set(prompt, 'message', ((typeof message === 'function') ? (answers) => (`${prefix} ${message(answers[namespace])}`) : `${prefix} ${message}`));
+                _.set(prompt,
+                    'message',
+                    ((typeof message === 'function')
+                        ? (answers) => (`${prefix} ${message(answers[namespace])}`)
+                        : `${prefix} ${message}`));
             } else if (_.isString(prompt)) {
                 originalPromptName = prompt;
                 let name = `${namespace}.${prompt}`;
@@ -192,7 +213,9 @@ function getMissing(config) {
             } else {
                 throw new Error(`invalid prompt in ${targetName}`);
             }
-            return prompt.optional || targetConfigProxy[originalPromptName] ? remainingPrompts : [ ...remainingPrompts, prompt ];
+            return (prompt.optional || targetConfigProxy[originalPromptName])
+                ? remainingPrompts
+                : [ ...remainingPrompts, prompt ];
         }, []);
         return [ ...acc, ...targetPrompts ];
     }
