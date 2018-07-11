@@ -12,7 +12,7 @@ const Answers = require('answers');
 const inquirer = require('inquirer');
 const cloneDeep = require('clone-deep');
 
-const ansiLabel = (label) => `${chalk.white('[')}${chalk.yellow(label)}${chalk.white(']')}`;
+const ansiLabel = (label) => `${chalk.reset.white('[')}${chalk.reset.yellow(label)}${chalk.reset.white(']')}`;
 
 const Printer = (label) => (value) => {
     console.log(ansiLabel(label),
