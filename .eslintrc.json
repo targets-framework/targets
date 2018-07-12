@@ -6,13 +6,21 @@
         "mocha": true
     },
     "parserOptions": {
-        "ecmaVersion": 6
+        "ecmaVersion": 2018,
+        "experimentalObjectRestSpread": true
     },
     "rules": {
         "no-console": 0,
+        "multiline-ternary": 2,
         "indent": [
-            "error",
-            4
+            "warn",
+            4,
+            {
+                "ignoredNodes": [
+                    ":statement > ConditionalExpression",
+                    "ConditionalExpression"
+                ]
+            }
         ],
         "linebreak-style": [
             "error",

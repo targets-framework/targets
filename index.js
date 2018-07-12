@@ -12,7 +12,17 @@ const Answers = require('answers');
 const inquirer = require('inquirer');
 const cloneDeep = require('clone-deep');
 
-const ansiLabel = (label) => `${chalk.reset.white('[')}${chalk.reset.yellow(label)}${chalk.reset.white(']')}`;
+const ansiLabel = label => `${chalk.reset.white('[')}${chalk.reset.yellow(label)}${chalk.reset.white(']')}`;
+
+const flattenTargetNames = names => names.reduce((acc, name) => [ ...acc, ...name.split(',') ], []);
+
+const forkTargets = config => ({
+    ...config,
+    _forks: config._.reduce((acc, name) => (name.indexOf(',') >= 0)
+          ? { ...acc, sequential: [ ...acc.sequential, ...name.split(',') ] }
+          : { ...acc, parallel: [ ...acc.parallel, name ] },
+        { sequential: [], parallel: [] })
+});
 
 const Printer = (label) => (value) => {
     console.log(ansiLabel(label),
@@ -27,20 +37,19 @@ const Printer = (label) => (value) => {
 
 function handleStream(stream, target, targetName) {
     const label = ansiLabel(target.label || targetName);
-    console.log(label, 'listening');
+    console.log(label, 'piping stream.stdout to process.stdout');
     const lineWrapper = new LineWrapper({ prefix: `${label} ` });
     stream.stdout.pipe(lineWrapper).pipe(process.stdout);
     stream.stderr.pipe(process.stderr);
     return stream.then
         ? stream
         : new Promise((resolve, reject) => {
-            stream.on('error', (e) => { console.log('something bad happened', e); reject(e); });
-            stream.on('end', resolve);
-        });
+              stream.on('error', (e) => { console.log('something bad happened', e); reject(e); });
+              stream.on('end', resolve);
+          });
 }
 
-function getChoices(config) {
-    const { _targets } = config;
+function getChoices({ _targets }) {
     const getterPairs = _.toPairs(_targets);
     return _.map(getterPairs, (pair) => {
         const getter = pair[1];
@@ -53,48 +62,29 @@ function getChoices(config) {
     });
 }
 
-function getInitialPrompt(config) {
-    if (_.isEmpty(config._)) {
-        let prompts = [
+const getInitialPrompt = config => (_.isEmpty(config._))
+    ? inquirer.prompt([
             {
                 type: 'checkbox',
                 name: 'targetNames',
                 message: 'Please select your targets',
                 choices: getChoices(config)
             }
-        ];
-        return inquirer.prompt(prompts)
-            .then((results) => {
-                config._ = results.targetNames;
-                return config;
-            });
-    } else {
-        return config;
-    }
-}
+        ]).then(({ targetNames:_ }) => ({ ...config, _ }))
+    : config;
 
-function TargetProxyHandler(config) {
-    return  {
-        get: (obj, prop) => {
-            return obj[prop] || config[prop];
-        },
-        has: (obj, prop) => {
-            return !!(obj[prop] || config[prop]);
-        },
-        ownKeys: (obj) => {
-            return [ ...new Set([ ...Object.keys(obj), ...Object.keys(config) ]) ];
-        },
-        getOwnPropertyDescriptor: () => {
-            return { enumerable: true, configurable: true };
-        }
-    };
-}
+const TargetProxyHandler = config => ({
+    get: (obj, prop) =>  obj[prop] || config[prop],
+    has: (obj, prop) => !!(obj[prop] || config[prop]),
+    ownKeys: obj => [ ...new Set([ ...Object.keys(obj), ...Object.keys(config) ]) ],
+    getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true })
+});
 
 function invokeSequentialTargets(config) {
     const { _targets } = config;
     const targetNames = config._forks.sequential;
 
-    function targetReducer(acc, targetName) {
+    const targetReducer = (acc, targetName) => {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
@@ -106,7 +96,7 @@ function invokeSequentialTargets(config) {
             console.log(ansiLabel('Target Not Found'), targetName);
         }
         return acc;
-    }
+    };
 
     const targetOptions = _.reduce(targetNames, targetReducer, []);
 
@@ -143,7 +133,7 @@ function invokeParallelTargets(config) {
     const { _targets } = config;
     const targetNames = config._forks.parallel;
 
-    function targetReducer(acc, targetName) {
+    const targetReducer = (acc, targetName) => {
         const target = _targets[targetName];
         if (_.isFunction(target)) {
             let namespace = targetName.split('.').shift();
@@ -170,9 +160,9 @@ function invokeParallelTargets(config) {
             console.log('no target found');
         }
         return acc;
-    }
+    };
 
-    const pendingTargets = _.reduce(targetNames, targetReducer, []);
+    const pendingTargets = targetNames.reduce(targetReducer, []);
 
     return Promise.all(pendingTargets);
 }
@@ -189,7 +179,7 @@ function getMissing(config) {
         if (_.isFunction(allTargetPrompts)) {
             allTargetPrompts = allTargetPrompts(targetConfig);
         }
-        const targetPrompts = _.reduce(allTargetPrompts, (remainingPrompts, prompt) => {
+        const targetPrompts = allTargetPrompts.reduce((remainingPrompts, prompt) => {
             let originalPromptName;
             if (_.isObject(prompt)) {
                 if (!prompt.type) prompt.type = "input";
@@ -219,70 +209,43 @@ function getMissing(config) {
         }, []);
         return [ ...acc, ...targetPrompts ];
     }
-    const allPrompts = _.reduce(targetNames, promptReducer, []);
+    const allPrompts = targetNames.reduce(promptReducer, []);
     const prompts = _.uniqBy(allPrompts, 'name');
     _answers.configure('prompts', prompts);
-    return _answers.get().then((c) => {
-        c._ = _.isEmpty(config._) ? c._ : config._;
-        return forkTargets(c);
-    });
+    return _answers.get().then((c) => forkTargets({
+        ...c,
+        ...config,
+        _: _.isEmpty(config._)
+            ? c._
+            : config._
+    }));
 }
 
-function flattenTargetNames(targetNames) {
-    return _.reduce(targetNames, (acc, targetName) => [ ...acc, ...targetName.split(',') ], []);
-}
-
-function forkTargets(config) {
-    const targets = _.reduce(config._, (acc, targetName) => {
-        if (targetName.indexOf(',') >= 0) {
-            acc.sequential = [ ...acc.sequential, ...targetName.split(',') ];
-        } else {
-            acc.parallel.push(targetName);
-        }
-        return acc;
-    }, { sequential: [], parallel: [] });
-
-    config._forks = {
-        parallel: targets.parallel,
-        sequential: targets.sequential
-    };
-
-    return config;
-}
-
-function Targets(options = {}) {
-    const { name, targets } = options;
-    const answers = Answers({ name });
-
-    function processGroups(config = {}) {
-        if (_.isEmpty(config._)) {
-            _.each(targets, (target, prop) => {
-                if (_.isArray(target) || _.isString(target)) {
-                    delete targets[prop];
-                }
-            });
-        } else {
-            config._ = _.reduce(config._, (acc, targetName) => {
+const InitializeConfig = ({ targets, answers }) => (config = {}) => (_.isEmpty(config._))
+    ? Object.entries(targets).reduce((acc, [ targetName, target ]) => (_.isArray(target) || _.isString(target))
+              ? acc
+              : { ...acc, _targets: { ...acc._targets, [targetName]: target } },
+          { ...config, _targets: {}, _answers: answers })
+    : {
+          ...config,
+          _: config._.reduce((acc, targetName) => {
                 const target = targets[targetName]; 
                 if (_.isArray(target)) {
-                    const result = [ ...acc, ...target ];
-                    return result;
+                    return [ ...acc, ...target ];
                 } else if (_.isString(target)) {
-                    const result = [ ...acc, target ];
-                    return result;
+                    return [ ...acc, target ];
                 } else {
                     return [ ...acc, targetName ];
                 }
-            }, []);
-        }
-        return config;
-    }
+             }, []),
+          _targets: targets,
+          _answers: answers
+      };
 
-    function augment(config = {}) {
-        config._targets = targets;
-        config._answers = answers;
-        return config;
-    }
+
+function Targets(options = {}) {
+    const { name, targets = [] } = options;
+    const answers = Answers({ name });
 
     function invokeTargets(config) {
         const chains = [];
@@ -303,11 +266,9 @@ function Targets(options = {}) {
     }
 
     return answers.get()
-        .then(processGroups)
-        .then(augment)
+        .then(InitializeConfig({ targets, answers }))
         .then(getInitialPrompt)
         .then(getMissing)
-        .then(augment)
         .then(invokeTargets);
 
 }
