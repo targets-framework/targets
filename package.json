@@ -7,8 +7,8 @@
     "lint": "./node_modules/.bin/eslint .",
     "test": "./node_modules/.bin/mocha \"test/**/*.spec.js\"",
     "watch": "npm run test -- --watch",
-    "coverage": "rm -rf coverage && node node_modules/.bin/istanbul --include-all-sources cover -x \"**/test/**/*.spec.js\" -x \"**/examples/**\" --dir=\"coverage\" --root=\"./\" node_modules/.bin/_mocha -- \"test/**/*.spec.js\"",
-    "check-coverage": "npm run coverage && ./node_modules/.bin/istanbul check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
+    "coverage": "rm -rf ./coverage && ./node_modules/.bin/nyc npm test",
+    "check-coverage": "npm run coverage && ./node_modules/.bin/nyc check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
   },
   "repository": {
     "type": "git",
@@ -20,23 +20,25 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "answers": "^1.6.1",
+    "answers": "^1.6.5",
     "bluebird": "3.5.0",
     "chalk": "1.1.3",
     "clone-deep": "^2.0.2",
     "inquirer": "^6.0.0",
     "lodash": "^4.17.10",
     "require-dir": "0.3.2",
-    "stream-line-wrapper": "0.1.1"
+    "stream-line-wrapper": "0.1.1",
+    "stream-to-promise": "^2.2.0"
   },
   "devDependencies": {
     "axios": "0.16.1",
     "bytes": "2.5.0",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
+    "babel-eslint": "^8.2.6",
     "eslint": "5.1.0",
-    "istanbul": "0.4.5",
     "mocha": "^5.2.0",
+    "nyc": "^12.0.2",
     "pre-commit": "1.2.2",
     "proxyquire": "1.7.11",
     "sinon": "2.2.0",
@@ -45,10 +47,9 @@
   },
   "pre-commit": [
     "lint",
-    "test",
-    "check-coverage"
+    "test"
   ],
   "engines": {
-    "node": ">=6.4.0"
+    "node": ">=10.6.0"
   }
 }

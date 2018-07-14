@@ -1,276 +1,241 @@
-#!/usr/bin/env node
 'use strict';
 
+module.exports = Targets;
+
 const os = require('os');
-const _ = require('lodash');
 const chalk = require('chalk');
-const EventEmitter = require('events').EventEmitter;
-const { ChildProcess } = require('child_process');
-const LineWrapper = require('stream-line-wrapper');
-const Promise = require('bluebird');
+const { get, uniqBy, isObject, flattenDeep } = require('lodash');
 const Answers = require('answers');
+const streamToPromise = require('stream-to-promise');
 const inquirer = require('inquirer');
-const cloneDeep = require('clone-deep');
 
-const ansiLabel = label => `${chalk.reset.white('[')}${chalk.reset.yellow(label)}${chalk.reset.white(']')}`;
+const bindingNamespace = '__binding__';
+const bindingDelimiter = '::';
+const clone = (v) => JSON.parse(JSON.stringify(v));
+const orObject = (v) => v == null ? {} : v;
+const rKey = Symbol.for('targets-result-store');
+const cKey = Symbol.for('targets-config-store');
+const resultStore = global[rKey] = [];
+const configStore = global[cKey] = [];
+const getPreviousConfig = (n = 1) => clone(orObject(configStore[configStore.length - n]));
+const getLatestConfig = () => getPreviousConfig(1);
+const getPreviousResult = (n = 1) => clone(orObject(resultStore[resultStore.length - n]));
+const getLatestResult = () => getPreviousResult(1);
+//const restorePreviousConfig = (n = 1) => configStore.push(getPreviousConfig(n));
+//const restoreInitialConfig = () => configStore.push(clone(configStore[0]));
 
-const flattenTargetNames = names => names.reduce((acc, name) => [ ...acc, ...name.split(',') ], []);
+const isReadableStream = stream =>
+    stream !== null &&
+    typeof stream === 'object' &&
+    typeof stream.pipe === 'function' &&
+    stream.readable !== false &&
+    typeof stream._read === 'function' &&
+    typeof stream._readableState === 'object';
 
-const forkTargets = config => ({
-    ...config,
-    _forks: config._.reduce((acc, name) => (name.indexOf(',') >= 0)
-          ? { ...acc, sequential: [ ...acc.sequential, ...name.split(',') ] }
-          : { ...acc, parallel: [ ...acc.parallel, name ] },
-        { sequential: [], parallel: [] })
-});
+const isTarget = (last, v) => !/^--?/.test(last || '') && !/^--?/.test(v);
 
-const Printer = (label) => (value) => {
-    console.log(ansiLabel(label),
-        ((_.isString(value))
-            ? value
-            : JSON.stringify(value, null, 4))
+const isBinding = (v) => new RegExp(`.+${bindingDelimiter}.+`).test(v);
+
+const isPromise = (obj) => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+
+const handleResult = (namespace, result) => {
+    if (namespace === bindingNamespace) return Promise.resolve('');
+    if (result == null) {
+        resultStore.push({ [namespace]: result });
+        return Promise.resolve('');
+    }
+    if (!isReadableStream(result.stdout || result)) {
+        if (isPromise(result)) return result.then((v) => (resultStore.push({ [namespace]: v }),v));
+        resultStore.push({ [namespace]: result });
+        return Promise.resolve(result);
+    }
+    const stream = result.stdout || result;
+    const streamPromises = [ streamToPromise(stream) ];
+    stream.pipe(process.stdout);
+    if (result.stderr) {
+        result.stderr.pipe(process.stderr);
+        streamPromises.push(streamToPromise(result.stderr));
+    }
+    return Promise.all(streamPromises).then((results) => results.forEach((r) => resultStore.push({ [namespace]: r })));
+};
+
+const ansiLabel = label =>
+    `${chalk.reset.white('[')}${chalk.reset.yellow(label)}${chalk.reset.white(']')}`;
+
+const maybeStringify = value => {
+    try {
+        return JSON.stringify(value, null, 4);
+    } catch (e) {
+        return value;
+    }
+};
+
+const print = (label, value) => {
+    value != null && label != bindingNamespace
+        && console.log(ansiLabel(label),
+            (`${typeof value === 'string'
+                ? value
+                : maybeStringify(value)}`
             .replace(new RegExp(`^${os.EOL}*`), '')
             .replace(new RegExp(`${os.EOL}*$`), '')
             .split(os.EOL)
-            .join(`\n${ansiLabel(label)} `));
+            .join(`\n${ansiLabel(label)} `)));
 };
 
-function handleStream(stream, target, targetName) {
-    const label = ansiLabel(target.label || targetName);
-    console.log(label, 'piping stream.stdout to process.stdout');
-    const lineWrapper = new LineWrapper({ prefix: `${label} ` });
-    stream.stdout.pipe(lineWrapper).pipe(process.stdout);
-    stream.stderr.pipe(process.stderr);
-    return stream.then
-        ? stream
-        : new Promise((resolve, reject) => {
-              stream.on('error', (e) => { console.log('something bad happened', e); reject(e); });
-              stream.on('end', resolve);
-          });
-}
+const Print = (label) => (value) => print(label, value);
 
-function getChoices({ _targets }) {
-    const getterPairs = _.toPairs(_targets);
-    return _.map(getterPairs, (pair) => {
-        const getter = pair[1];
-        const getterKey = pair[0];
-        const option = {
-            name: getter.label || getterKey,
-            value: getterKey
-        };
-        return option;
-    });
-}
+const printer = (value) =>
+    Array.isArray(value)
+        ? value.map(printer)
+        : print(value.label, value.value);
 
-const getInitialPrompt = config => (_.isEmpty(config._))
-    ? inquirer.prompt([
-            {
-                type: 'checkbox',
-                name: 'targetNames',
-                message: 'Please select your targets',
-                choices: getChoices(config)
-            }
-        ]).then(({ targetNames:_ }) => ({ ...config, _ }))
-    : config;
-
-const TargetProxyHandler = config => ({
-    get: (obj, prop) =>  obj[prop] || config[prop],
-    has: (obj, prop) => !!(obj[prop] || config[prop]),
-    ownKeys: obj => [ ...new Set([ ...Object.keys(obj), ...Object.keys(config) ]) ],
-    getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true })
-});
-
-function invokeSequentialTargets(config) {
-    const { _targets } = config;
-    const targetNames = config._forks.sequential;
-
-    const targetReducer = (acc, targetName) => {
-        const target = _targets[targetName];
-        if (_.isFunction(target)) {
-            let namespace = targetName.split('.').shift();
-            let targetConfig = config[namespace] || {};
-            let targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
-            let targetOptions = { _targets, target, targetName, targetConfigProxy };
-            acc.push(targetOptions);
-        } else {
-            console.log(ansiLabel('Target Not Found'), targetName);
-        }
-        return acc;
-    };
-
-    const targetOptions = _.reduce(targetNames, targetReducer, []);
-
-    return Promise.reduce(targetOptions, (acc, { _targets, target, targetName, targetConfigProxy }) => {
-        let returnValue = target(targetConfigProxy, Printer(target.label || targetName), acc);
-        if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
-            returnValue = handleStream(returnValue, target, targetName);
-        }
-        return Promise.resolve(returnValue)
-            .then((result) => {
-                if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
-                    return { _targets, targetName, result: null };
-                } else {
-                    return { _targets, targetName, result };
+const NamespacedPrompts = (prompts, namespace) =>
+    prompts.reduce((a, p) => {
+        if (typeof p === 'string') {
+            return [
+                ...a,
+                {
+                    type: 'input',
+                    name: `${namespace}.${p}`,
+                    message: `${ansiLabel(`${namespace}.${p}`)} ${p}`
                 }
-            }).catch((e) => {
-                if (process.env.DEBUG) console.error(e);
-                return { _targets, targetName, result: 'unavailable' };
-            }).then((result) => {
-                acc = { targetName, result: result.result };
-                print(result);
-                return acc;
-            });
-    }, null);
-}
+            ];
+        }
+        if (isObject(p)) {
+            const message = get(p, 'message', p.name);
+            return [
+                ...a,
+                {
+                    ...p,
+                    name: `${namespace}.${p.name}`,
+                    message: `${ansiLabel(`${namespace}.${p.name}`)} ${((typeof message === 'function')
+                            ? (config) => message(config[namespace])
+                            : message)}`
+                }
+            ];
+        }
+        return a;
+    }, []);
 
-function print(data) {
-    const label = data._targets[data.targetName].label || data.targetName;
-    if (data && data.result) Printer(label)(data.result);
+const TargetChoices = (targets) => Object.entries(targets)
+    .map(([ targetName, target ]) => ({
+        name: target.label || targetName,
+        value: targetName
+    }));
+
+const InitialPrompt = (targets) =>
+    inquirer.prompt([
+        {
+            type: 'checkbox',
+            name: 'targetNames',
+            message: 'Please select your targets',
+            choices: TargetChoices(targets)
+        }
+    ]).then(({ targetNames }) => targetNames);
+
+const hasTargets = (argv) => !!argv
+    .reduce((acc, arg, i, col) => isTarget(col[i - 1], arg)
+            ? [ ...acc, arg ]
+            : acc,
+        []).length;
+
+const getArgv = (targets, argv) =>
+    hasTargets(argv)
+        ? Promise.resolve(argv)
+        : InitialPrompt(targets).then(targets =>
+            [ ...targets, ...argv ]);
+
+const QueueFn = (fn, name) => {
+    const namespace = name.split('.').shift();
+    const result = { fn, name, namespace };
+    if (fn.prompts) {
+        result.prompts = NamespacedPrompts(fn.prompts, namespace);
+        delete fn.prompts;
+    }
+    return result;
+};
+
+const QueueBinding = (arg) => {
+    const [ fromPath, toPath ] = arg.split(bindingDelimiter);
+    return {
+        fn: () => {
+            const nextConfig = getLatestConfig();
+            const lastResult = getLatestResult();
+            configStore.push(Answers.deepSet(nextConfig, toPath, get(lastResult, fromPath)));
+            return;
+        },
+        name: bindingNamespace,
+        namespace: bindingNamespace
+    };
+};
+
+const QueueGroup = (targets, arg, name) => {
+    if (typeof arg === 'string' && arg.includes(',')) {
+        return [ QueueGroup(targets, arg.split(',')) ];
+    }
+    if (Array.isArray(arg)) {
+        return arg.reduce((a, n) => {
+            return [ ...a, ...QueueGroup(targets, n) ];
+          }, []);
+    }
+    if (typeof arg === 'string' && isBinding(arg)) {
+        return [ QueueBinding(arg) ];
+    }
+    if (typeof arg === 'string') {
+        return QueueGroup(targets, targets[arg], arg);
+    }
+    if (typeof arg === 'function') {
+        return [ QueueFn(arg, name) ];
+    }
+    console.log('invalid target name in command');
+    return [];
+};
+
+const Queue = (targets, argv) => argv
+    .reduce((acc, arg, i, col) => isTarget(col[i - 1], arg)
+              ? [ ...acc, ...QueueGroup(targets, arg) ]
+              : acc,
+        []);
+
+const Prompts = (queue) => uniqBy(flattenDeep(queue)
+    .reduce((acc, entry) => entry.prompts
+            ? [ ...acc, ...entry.prompts ]
+            : acc,
+        []), 'name');
+
+function UnitOfWork(unit) {
+    const config = getLatestConfig();
+    if (typeof unit.fn === 'function') return handleResult(unit.namespace, unit.fn(config[unit.namespace] || {}, Print(unit.fn.label || unit.name)))
+        .then(r => ({ label: unit.fn.label || unit.name, value: r }))
+        .then(printer);
+    if (Array.isArray(unit)) return Promise.all(unit.map((entry) =>
+        UnitOfWork(entry, config)));
     return;
 }
 
-function invokeParallelTargets(config) {
-    const { _targets } = config;
-    const targetNames = config._forks.parallel;
-
-    const targetReducer = (acc, targetName) => {
-        const target = _targets[targetName];
-        if (_.isFunction(target)) {
-            let namespace = targetName.split('.').shift();
-            let targetConfig = config[namespace] || {};
-            let targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
-            let returnValue = target(targetConfigProxy, Printer(target.label || targetName));
-            if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
-                returnValue = handleStream(returnValue, target, targetName);
-            }
-            let pendingResult = Promise.resolve(returnValue)
-                .then((result) => {
-                    if (returnValue instanceof EventEmitter || returnValue instanceof ChildProcess) {
-                        return { _targets, targetName, result: null };
-                    } else {
-                        return { _targets, targetName, result };
-                    }
-                })
-                .catch(() => {
-                    return { _targets, targetName, result: 'unavailable' };
-                })
-                .then(print);
-            acc.push(pendingResult);
-        } else {
-            console.log('no target found');
+async function* Scheduler(queue) {
+    while (queue.length > 0) {
+        try {
+            yield UnitOfWork(queue.shift());
+        } catch (e) {
+            console.error('Caught promise rejection. Exiting now.', e);
+            process.exit(1);
         }
-        return acc;
-    };
-
-    const pendingTargets = targetNames.reduce(targetReducer, []);
-
-    return Promise.all(pendingTargets);
-}
-
-function getMissing(config) {
-    const { _targets, _answers } = config;
-    const targetNames = flattenTargetNames(config._);
-    function promptReducer(acc, targetName) {
-        const namespace = targetName.split('.').shift();
-        const target = _targets[targetName] || {};
-        const targetConfig = config[namespace] || {};
-        const targetConfigProxy = new Proxy(targetConfig, TargetProxyHandler(config));
-        let allTargetPrompts = cloneDeep(target.prompts) || [];
-        if (_.isFunction(allTargetPrompts)) {
-            allTargetPrompts = allTargetPrompts(targetConfig);
-        }
-        const targetPrompts = allTargetPrompts.reduce((remainingPrompts, prompt) => {
-            let originalPromptName;
-            if (_.isObject(prompt)) {
-                if (!prompt.type) prompt.type = "input";
-                originalPromptName = prompt.name;
-                _.set(prompt, 'name', `${namespace}.${prompt.name}`);
-                const prefix = ansiLabel(`${namespace}.${originalPromptName}`);
-                const message = _.get(prompt, 'message');
-                _.set(prompt,
-                    'message',
-                    ((typeof message === 'function')
-                        ? (answers) => (`${prefix} ${message(answers[namespace])}`)
-                        : `${prefix} ${message}`));
-            } else if (_.isString(prompt)) {
-                originalPromptName = prompt;
-                let name = `${namespace}.${prompt}`;
-                prompt = {
-                    type: 'input',
-                    name,
-                    message: name
-                };
-            } else {
-                throw new Error(`invalid prompt in ${targetName}`);
-            }
-            return (prompt.optional || targetConfigProxy[originalPromptName])
-                ? remainingPrompts
-                : [ ...remainingPrompts, prompt ];
-        }, []);
-        return [ ...acc, ...targetPrompts ];
     }
-    const allPrompts = targetNames.reduce(promptReducer, []);
-    const prompts = _.uniqBy(allPrompts, 'name');
-    _answers.configure('prompts', prompts);
-    return _answers.get().then((c) => forkTargets({
-        ...c,
-        ...config,
-        _: _.isEmpty(config._)
-            ? c._
-            : config._
-    }));
 }
 
-const InitializeConfig = ({ targets, answers }) => (config = {}) => (_.isEmpty(config._))
-    ? Object.entries(targets).reduce((acc, [ targetName, target ]) => (_.isArray(target) || _.isString(target))
-              ? acc
-              : { ...acc, _targets: { ...acc._targets, [targetName]: target } },
-          { ...config, _targets: {}, _answers: answers })
-    : {
-          ...config,
-          _: config._.reduce((acc, targetName) => {
-                const target = targets[targetName]; 
-                if (_.isArray(target)) {
-                    return [ ...acc, ...target ];
-                } else if (_.isString(target)) {
-                    return [ ...acc, target ];
-                } else {
-                    return [ ...acc, targetName ];
-                }
-             }, []),
-          _targets: targets,
-          _answers: answers
-      };
-
-
-function Targets(options = {}) {
-    const { name, targets = [] } = options;
-    const answers = Answers({ name });
-
-    function invokeTargets(config) {
-        const chains = [];
-
-        if (!_.isEmpty(config._forks.parallel)) {
-            chains.push(Promise.resolve(config)
-                .then(invokeParallelTargets)
-                .catch(console.error));
-        }
-
-        if (!_.isEmpty(config._forks.sequential)) {
-            chains.push(Promise.resolve(config)
-                .then(invokeSequentialTargets)
-                .catch(console.error));
-        }
-
-        return Promise.all(chains);
-    }
-
-    return answers.get()
-        .then(InitializeConfig({ targets, answers }))
-        .then(getInitialPrompt)
-        .then(getMissing)
-        .then(invokeTargets);
-
+async function Targets(options = {}) {
+    const {
+        name,
+        targets = {},
+        argv:initialArgv = process.argv.slice(2)
+    } = options;
+    const argv = await getArgv(targets, initialArgv);
+    const queue = Queue(targets, argv);
+    const prompts = Prompts(queue);
+    const answers = Answers({ name, prompts });
+    const config = await answers.get();
+    configStore.push(config);
+    /* eslint-disable-next-line */
+    for await (const result of Scheduler(queue)) {}
 }
-
-module.exports = Targets;

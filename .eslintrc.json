@@ -5,23 +5,14 @@
         "node": true,
         "mocha": true
     },
+    "parser": "babel-eslint",
     "parserOptions": {
         "ecmaVersion": 2018,
         "experimentalObjectRestSpread": true
     },
     "rules": {
         "no-console": 0,
-        "multiline-ternary": 2,
-        "indent": [
-            "warn",
-            4,
-            {
-                "ignoredNodes": [
-                    ":statement > ConditionalExpression",
-                    "ConditionalExpression"
-                ]
-            }
-        ],
+        "indent": 0,
         "linebreak-style": [
             "error",
             "unix"
