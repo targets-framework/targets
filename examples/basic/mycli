@@ -14,8 +14,8 @@ function foo() {
  * A more complete target should may return a promise, has a label property and
  * a may have a prompts property which contains `inquirer` prompts for the target.
  */
-function greet(options) {
-    return Promise.resolve(`Hello, ${options.name}!`);
+function greet({ name }) {
+    return `Hello, ${name}!`;
 }
 greet.label = "greet example";
 greet.prompts = [
@@ -27,11 +27,19 @@ greet.prompts = [
 ];
 
 /**
+ * targets can return values, Promises or streams. here's a target which returns a stream
+ */
+function whoami() {
+    return require('child_process').spawn('whoami');
+}
+
+/**
  * Register targets
  */
 Targets({
     targets: {
         greet,
-        foo
+        foo,
+        whoami
     }
 });

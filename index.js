@@ -8,6 +8,7 @@ const { get, uniqBy, isObject, flattenDeep } = require('lodash');
 const Answers = require('answers');
 const streamToPromise = require('stream-to-promise');
 const inquirer = require('inquirer');
+const LineWrapper = require('stream-line-wrapper');
 
 const bindingNamespace = '__binding__';
 const bindingDelimiter = '::';
@@ -45,18 +46,36 @@ const handleResult = (namespace, result) => {
         return Promise.resolve('');
     }
     if (!isReadableStream(result.stdout || result)) {
-        if (isPromise(result)) return result.then((v) => (resultStore.push({ [namespace]: v }),v));
+        if (isPromise(result)) return result.then((v) => {
+            resultStore.push({ [namespace]: v });
+            return v;
+        });
         resultStore.push({ [namespace]: result });
         return Promise.resolve(result);
     }
     const stream = result.stdout || result;
     const streamPromises = [ streamToPromise(stream) ];
-    stream.pipe(process.stdout);
+    const prefix = `${ansiLabel(namespace)} `;
+    const stdoutLineWrapper = new LineWrapper({ prefix });
+    stream.pipe(stdoutLineWrapper).pipe(process.stdout);
     if (result.stderr) {
-        result.stderr.pipe(process.stderr);
+        const stderrLineWrapper = new LineWrapper({ prefix });
+        result.stderr.pipe(stderrLineWrapper).pipe(process.stderr);
         streamPromises.push(streamToPromise(result.stderr));
     }
-    return Promise.all(streamPromises).then((results) => results.forEach((r) => resultStore.push({ [namespace]: r })));
+    return Promise.all(streamPromises).then(([ stdout, stderr ]) => {
+        const value = stdout.toString().trim();
+        const result = {
+            value,
+            __stream__: true
+        };
+        resultStore.push({ [namespace]: value });
+        const error = stderr.toString().trim();
+        if (error) {
+            print(`${namespace} error`, error);
+        }
+        return result;
+    });
 };
 
 const ansiLabel = label =>
@@ -197,17 +216,25 @@ const Queue = (targets, argv) => argv
               : acc,
         []);
 
-const Prompts = (queue) => uniqBy(flattenDeep(queue)
-    .reduce((acc, entry) => entry.prompts
-            ? [ ...acc, ...entry.prompts ]
+const Prompts = (argv, queue) => {
+    const bindingsTo = argv.reduce((acc, v) =>
+        (new RegExp(`.+${bindingDelimiter}.+`).test(v))
+            ? [ ...acc, v.split(bindingDelimiter)[1] ]
             : acc,
-        []), 'name');
+        []);
+    return uniqBy(flattenDeep(queue)
+        .reduce((acc, entry) => entry.prompts
+                ? [ ...acc, ...entry.prompts ]
+                : acc,
+            []), 'name')
+        .filter((p) => !bindingsTo.includes(p.name));
+};
 
 function UnitOfWork(unit) {
     const config = getLatestConfig();
     if (typeof unit.fn === 'function') return handleResult(unit.namespace, unit.fn(config[unit.namespace] || {}, Print(unit.fn.label || unit.name)))
-        .then(r => ({ label: unit.fn.label || unit.name, value: r }))
-        .then(printer);
+        .then(r => ({ label: unit.fn.label || unit.name, value: r, stream: !!(r||{}).__stream__ }))
+        .then(r => r.stream || printer(r));
     if (Array.isArray(unit)) return Promise.all(unit.map((entry) =>
         UnitOfWork(entry, config)));
     return;
@@ -232,7 +259,7 @@ async function Targets(options = {}) {
     } = options;
     const argv = await getArgv(targets, initialArgv);
     const queue = Queue(targets, argv);
-    const prompts = Prompts(queue);
+    const prompts = Prompts(argv, queue);
     const answers = Answers({ name, prompts });
     const config = await answers.get();
     configStore.push(config);
