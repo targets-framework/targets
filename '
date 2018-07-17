@@ -24,7 +24,7 @@ To run it:
    *  create a new package.json with `npm init -y`
    *  `npm install --save targets`
    *  copy the above example to a file to a new file, `./index.js`
-   *  add this to your package.json: `"bin": "./index.js",` and save the file
+   *  add this to your package.json: `"bin": { "mycli": "./index.js" },` and save
    *  make it executable with `chmod +x ./index.js`
    *  run `npm link` to create a globally available symlink to your new CLI
    *  run `mycli greet`
@@ -71,10 +71,10 @@ greet.label = "Basic Example";
 require('targets')({ targets: { greet } });
 ```
 
-In this case, if you run `mycli greet --greet.name Jane` you'd see the following output:
+In this case, if you run `mycli greet --greet.name="John"` you'd see the following output:
 
 ```text
-[Basic Example] Hello, Jane!
+[Basic Example] Hello, John!
 ```
 
 Notice how the `name` option has been namespaced under greet in the command line. If you register multiple targets to a given namespace they will share config. Here's an example.
@@ -108,19 +108,19 @@ require('targets')({
 });
 ```
 
-You can now specify location as `--weather.location Chicago` for both `mycli weather.sky` and `mycli weather.temp`. For example:
+You can now specify location as `--weather.location="Chicago"` for both `mycli weather.sky` and `mycli weather.temp`. For example:
 
 ```text
-mycli weather.sky --weather.location Chicago
+mycli weather.sky --weather.location="Chicago"
 [Current Weather] Partly Sunny
-mycli weather.temp --weather.location Chicago
+mycli weather.temp --weather.location="Chicago"
 [Current Temperature] 75
 ```
 
 This is a good point at which to demonstrate how tasks can be composed, or run together. Consider the following.
 
 ```text
-mycli weather.sky weather.temp --weather.location Chicago
+mycli weather.sky weather.temp --weather.location="Chicago"
 [Current Weather] Partly Sunny
 [Current Temperature] 75
 ```
@@ -131,7 +131,8 @@ But, before we get any further into Targets task composition functionality, let'
 #!/usr/bin/env node
 'use strict';
 
-function greet({ name = "World" }) {
+function greet(options) {
+    const name = options.name;
     return "Hello, ${name}!";
 }
 greet.label = "Config Example";
@@ -148,19 +149,19 @@ require('targets')({ targets: { greet } });
 
 In this example, we're declaring what configuration our target will need in terms of prompts which can be asked to the user.
 
-If we run the above with `mycli greet` and no additional arguments, Targets will detect that config is missing for the `greet` target and the user will be prompted. The output will look something like this.
+If we run the above with `./mycli greet` and no additional arguments, Targets will detect that config is missing for the `greet` target and the user will be prompted. The output will look something like this.
 
 ```text
-mycli greet
-? [greet.name] What's your name? John
+./mycli greet
+? What's your name? John
 [Config Example] Hello, John!
 ```
 
 Of course, if the needed config is provided the user will not be prompted, just as before.
 
 ```text
-mycli greet --greet.name Jane
-[Config Example] Hello, Jane!
+./mycli greet --greet.name="John"
+[Config Example] Hello, John!
 ```
 
 I call this concept "naive config". This gives the user the ability to use your target without knowing what config is needed because the target itself knows how to ask for it. The prompts are [inquirer](https://www.npmjs.com/package/inquirer) options. Check the docs to learn all the various ways you'll be able to prompt for config.
@@ -180,14 +181,14 @@ Let's assume there is a `./myclirc` file in the project's root directory which c
 With this file in place, running the command without arguments will now resolve config from the file and the user will not be prompted.
 
 ```text
-mycli greet
+./mycli greet
 [Config Example] Hello, Bob!
 ```
 
 Let's move that rc file so that it resides in the user's home directory (`$HOME/.myclirc`) instead of in the project directory.
 
 ```text
-mycli greet
+./mycli greet
 [Config Example] Hello, Bob!
 ```
 
@@ -218,17 +219,17 @@ Let's start by adding a `logger` target to our CLI which simple prints out the o
 'use strict';
 
 function logger(options) {
-    return options;
+    return JSON.stringify(options, null, 4);
 }
 
 require('targets')({ targets: { logger } });
 ```
 
-To test that it's working, run `mycli logger --logger.foo`. You should see the following output.
+To test that it's working, run `./mycli logger --logger.foo`. You should see the following output.
 
 
 ```text
-mycli logger --logger.foo
+./mycli logger --logger.foo
 [logger] {
 [logger]     "foo": true
 [logger] }
@@ -254,10 +255,10 @@ Now, create a `./.myclirc` in your project directory which contains the followin
 }
 ```
 
-Run `mycli logger --logger.collection[2].name bar`. You should see this output.
+Run `./mycli logger --logger.collection[2].name="bar"`. You should see this output.
 
 ```text
-mycli logger
+./mycli logger
 [logger] {
 [logger]     "collection": [
 [logger]         {
@@ -273,122 +274,68 @@ mycli logger
 [logger] }
 ```
 
-With targets, you can override and amend to almost any value in the config via command-line arguments no matter how complex the config.
+Take a moment to review what just happened. You were able to override a specific item within the collection defined inside your project's config file from the command line without affecting any of the other config from that file. This is a very powerful idea. There will be times you will find you need the ability to override a deeply nested property within your config, and Targets let's you do it with surgical precision.
 
-Let's consider a more complex config example. Modify the `./.myclirc` in your project directory to look like the following:
+I'd like to give credit for this ability to reach deeply into the config in this manner to [keypather](https://www.npmjs.com/package/keypather) by [Tejesh Mehta](https://github.com/tjmehta). I've enhanced keypather within [answers](https://www.npmjs.com/package/answers) to work recursively through keypathed properties, but the core piece of functionality that makes this possible was all Tejesh's masterful work.
 
-```js
-{
-    "logger": {
-        "collection": [
-            {
-                "people": [
-                    {
-                        "name": "Jane",
-                        "role": "Developer"
-                    },
-                    {
-                        "name": "Peter",
-                        "role": "Manager"
-                    }
-                ]
-            }
-        ]
-    }
-}
-```
+Now that you understand where config comes from, and how to declare your Targets config requirements as prompts, let's take a look at more advanced way to define and compose your targets.
 
-Run `mycli logger --logger.collection[0].people[+].name Shana --logger.collection[0].people[+].role Director`. You should see this output.
-
-```text
-mycli logger
-[logger] {
-[logger]     "collection": [
-[logger]         {
-[logger]             "people": [
-[logger]                 {
-[logger]                     "name": "Jane",
-[logger]                     "role": "Developer"
-[logger]                 },
-[logger]                 {
-[logger]                     "name": "Peter",
-[logger]                     "role": "Manager"
-[logger]                 },
-[logger]                 {
-[logger]                     "name": "Shana",
-[logger]                     "role": "Director"
-[logger]                 }
-[logger]             ]
-[logger]         }
-[logger]     ]
-[logger] }
-```
-
-This `[+]` syntax is a special syntax which allows you to push items onto an array in the existing config. There are two other special syntaxes. `[-]` prepends an existing array ("unshift") and `[<int>,<int>]` splices an existing array.
-
-Sometime you will want the result from one target to be bound to the input for another target. Targets supports this via a mechanism called bindings.
-
-Consider the following.
+Targets can be defined as Promises. Consider the following.
 
 ```js
 #!/usr/bin/env node
-
 'use strict';
 
-function systemName() {
-    return require('child_process').spawn('whoami');
-}
-systemName.label = "System Name";
+const axios = require('axios');
 
-function githubUser({ username }) {
-    return require('axios')
-        .get(`https://api.github.com/users/${username}`)
-        .then(({ data }) => data);
+function greet() {
+    return axios.get('https://api.github.com/users/machellerogden')
+        .then((res) => res.data.name);
 }
-githubUser.silent = true;
+greet.label = "Async Example";
 
-function greet({ name }) {
-    return `Hello, ${name}!`;
-}
-greet.label = "Greet";
-
-require('targets')({
-    targets: {
-        'system.name': systemName,
-        'github.user': githubUser,
-        greet
-    }
-});
+require('targets')({ targets: { greet } });
 ```
 
-Let's run some example of using binding on these targets...
+The output here comes from the github api, in this case it will be my name.
 
 ```text
-mycli system.name system.name::greet.name greet
-[System Name] machellerogden
-[Greet] Hello, machellerogden!
+./mycli greet
+[Async Example] Hello, Mac Heller-Ogden!
 ```
 
-...and another example...
+To demostrate that all targets are called asynchronously by default, let's try adding another synchronous target.
+
+```js
+#!/usr/bin/env node
+'use strict';
+
+const axios = require('axios');
+
+function greet() {
+    return axios.get('https://api.github.com/users/machellerogden')
+        .then((res) => res.data.name);
+}
+greet.label = "Async Example";
+
+require('targets')({ targets: { greet, foo: () => 'bar' } });
+```
+
+And now, when we run `./mycli greet foo` the output displays in the opposite order we entered in our command because the greet function takes longer to resolve.
 
 ```text
-mycli github.user github.user.name::greet.name greet
-[Greet] Hello, Mac Heller-Ogden!
+./mycli greet foo
+[foo] bar
+[Async Example] Hello, Mac Heller-Ogden!
 ```
 
-Tip: the right-side of the binding can use the special array notations: `[+]`, `[-]`, `[<int>,<int>]`.
-
-Now that you understand bindings, let's talk about sequencing. Targets are run
-sequentially by default, but when separated by comma will be invoked in parallel.
-Here's an example.
+If we want targets to be invoked sequentially, use commas to separate the target names instead of spaces, like so.
 
 ```text
-mycli weather.sky,weather.temp --weather.location Chicago
-[Current Temperature] 75
-[Current Weather] Partly Sunny
+./mycli greet,foo
+[Async Example] Hello, Mac Heller-Ogden!
+[foo] bar
 ```
-
-Note the order of the results. Because these were run in parallel the order of the results is non-deterministic.
 
 Targets can also be defined as streams. Consider the following.
 
@@ -402,10 +349,10 @@ function tcpdump() {
 require('targets')({ targets: { tcpdump } });
 ```
 
-Now, when we run `sudo mycli tcpdump` the output from tcpdump is streamed to the console.
+Now, when we run `sudo ./mycli tcpdump` the output from tcpdump is streamed to the console.
 
 ```text
-sudo mycli tcpdump
+sudo ./mycli tcpdump
 [tcpdump] output here...
 [tcpdump] output here...
 [tcpdump] output here...
@@ -424,11 +371,11 @@ I recommend you structure your Targets application in the following manner.
     │ ├─── memory.js
     │ └─── tcpdump.js
     ├─ package.json
-    ├─ index.js
+    ├─ mycli
     └─ .myclirc
 ```
 
-Then, in `./index.js` you just need to include the following to auto register any new target file modules.
+Then, in `./mycli` you just need to include the following to auto register any new target file modules.
 
 ```js
 #!/usr/bin/env node
@@ -436,7 +383,7 @@ Then, in `./index.js` you just need to include the following to auto register an
 
 const targets = require('require-dir')('./targets');
 
-require('targets')({ name: 'mycli', targets });
+require('targets')({ targets });
 ```
 
 With this structure in place, so long as each file module inside the `./targets` directory exports a function, the filename (minus the extension) will become the target's name.

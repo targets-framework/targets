@@ -4,7 +4,7 @@ module.exports = Targets;
 
 const os = require('os');
 const chalk = require('chalk');
-const { get, uniqBy, isObject, flattenDeep } = require('lodash');
+const { get, set, uniqBy, isObject, flattenDeep } = require('lodash');
 const Answers = require('answers');
 const streamToPromise = require('stream-to-promise');
 const inquirer = require('inquirer');
@@ -39,18 +39,18 @@ const isBinding = (v) => new RegExp(`.+${bindingDelimiter}.+`).test(v);
 
 const isPromise = (obj) => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
 
-const handleResult = (namespace, result) => {
+const handleResult = (name, namespace, result) => {
     if (namespace === bindingNamespace) return Promise.resolve('');
     if (result == null) {
-        resultStore.push({ [namespace]: result });
+        resultStore.push(set({}, name, result));
         return Promise.resolve('');
     }
     if (!isReadableStream(result.stdout || result)) {
         if (isPromise(result)) return result.then((v) => {
-            resultStore.push({ [namespace]: v });
+            resultStore.push(set({}, name, v));
             return v;
         });
-        resultStore.push({ [namespace]: result });
+        resultStore.push(set({}, name, result));
         return Promise.resolve(result);
     }
     const stream = result.stdout || result;
@@ -63,17 +63,13 @@ const handleResult = (namespace, result) => {
         result.stderr.pipe(stderrLineWrapper).pipe(process.stderr);
         streamPromises.push(streamToPromise(result.stderr));
     }
-    return Promise.all(streamPromises).then(([ stdout, stderr ]) => {
+    return Promise.all(streamPromises).then(([ stdout ]) => {
         const value = stdout.toString().trim();
         const result = {
             value,
             __stream__: true
         };
-        resultStore.push({ [namespace]: value });
-        const error = stderr.toString().trim();
-        if (error) {
-            print(`${namespace} error`, error);
-        }
+        resultStore.push(set({}, name, value));
         return result;
     });
 };
@@ -89,8 +85,8 @@ const maybeStringify = value => {
     }
 };
 
-const print = (label, value) => {
-    value != null && label != bindingNamespace
+const print = (label, value, silent) => {
+    value != null && !silent && label != bindingNamespace
         && console.log(ansiLabel(label),
             (`${typeof value === 'string'
                 ? value
@@ -106,7 +102,7 @@ const Print = (label) => (value) => print(label, value);
 const printer = (value) =>
     Array.isArray(value)
         ? value.map(printer)
-        : print(value.label, value.value);
+        : print(value.label, value.value, value.silent);
 
 const NamespacedPrompts = (prompts, namespace) =>
     prompts.reduce((a, p) => {
@@ -232,8 +228,8 @@ const Prompts = (argv, queue) => {
 
 function UnitOfWork(unit) {
     const config = getLatestConfig();
-    if (typeof unit.fn === 'function') return handleResult(unit.namespace, unit.fn(config[unit.namespace] || {}, Print(unit.fn.label || unit.name)))
-        .then(r => ({ label: unit.fn.label || unit.name, value: r, stream: !!(r||{}).__stream__ }))
+    if (typeof unit.fn === 'function') return handleResult(unit.name, unit.namespace, unit.fn(config[unit.namespace] || {}, Print(unit.fn.label || unit.name)))
+        .then(r => ({ silent: !!unit.fn.silent, label: unit.fn.label || unit.name, value: r, stream: !!(r||{}).__stream__ }))
         .then(r => r.stream || printer(r));
     if (Array.isArray(unit)) return Promise.all(unit.map((entry) =>
         UnitOfWork(entry, config)));

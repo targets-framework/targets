@@ -1,0 +1,18 @@
+{
+    "logger": {
+        "collection": [
+            {
+                "people": [
+                    {
+                        "name": "Jane",
+                        "role": "Developer"
+                    },
+                    {
+                        "name": "Peter",
+                        "role": "Manager"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -107,14 +107,14 @@ greet.prompts = [
 ...we've added a label and some prompts. Let's see what this does when we do not include the `--greet.name` option...
 
 ```sh
-$ ./examples/basic/mycli greet
-? [greet.name] What's your name? Bob
-[greet example] Hello, Bob!
+$ ./index.js greet
+? [greet.name] What's your name? Peter
+[greet example] Hello, Peter!
 ```
 
 This time you were prompted for the missing config!
 
-TODO: add details about deep config merge syntax.
+**Want to learn more?** Check out the [full tutorial](https://github.com/machellerogden/targets/blob/master/TUTORIAL.md).
 
 ## Background
 

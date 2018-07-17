@@ -1,7 +1,7 @@
 'use strict';
 
-function logger(answers) {
-    return JSON.stringify(answers, null, 4);
+function logger(config) {
+    return config;
 }
 
 module.exports = logger;
