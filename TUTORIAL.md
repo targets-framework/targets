@@ -378,6 +378,29 @@ mycli github.user github.user.name::greet.name greet
 
 Tip: the right-side of the binding can use the special array notations: `[+]`, `[-]`, `[<int>,<int>]`.
 
+You can also, rebind config by prefacing your binding with an `@` character. For example...
+
+```text
+mycli --foo.location Miami @foo.location::weather.location weather.sky
+```
+
+In this example the foo location config value will be copied over to weather.location.
+
+This is particularly useful when you are creating composite targets. Consider the following config:
+
+```text
+{
+    "name": "myproject"
+}
+```
+
+...let's say you have a docker namespace and a k8s namespace target which both want to use this top-level name property. For this scenario, you could write a composite target like so:
+
+```text
+// deploy.js
+module.exports = [ '@name::docker.name', '@name::k8s.name', 'docker.build', 'docker.push', 'k8s.deploy' ];
+```
+
 Now that you understand bindings, let's talk about sequencing. Targets are run
 sequentially by default, but when separated by comma will be invoked in parallel.
 Here's an example.
