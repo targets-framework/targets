@@ -1,5 +1,6 @@
 {
     "logger": {
+        "location": "Miami",
         "collection": [
             {
                 "people": [

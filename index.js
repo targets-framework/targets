@@ -35,7 +35,9 @@ const isReadableStream = stream =>
 
 const isTarget = (last, v) => !/^--?/.test(last || '') && !/^--?/.test(v);
 
+const isConfigOp = (v) => new RegExp(`^@.+`).test(v);
 const isBinding = (v) => new RegExp(`.+${bindingDelimiter}.+`).test(v);
+//const isConfigBinding = (v) => isConfigOp(v) && isBinding(v);
 
 const isPromise = (obj) => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
 
@@ -86,7 +88,7 @@ const maybeStringify = value => {
 };
 
 const print = (label, value, silent) => {
-    value != null && !silent && label != bindingNamespace
+    value != null && !silent
         && console.log(ansiLabel(label),
             (`${typeof value === 'string'
                 ? value
@@ -170,16 +172,20 @@ const QueueFn = (fn, name) => {
     return result;
 };
 
-const QueueBinding = (arg) => {
+const QueueBinding = (arg, useResult) => {
     const [ fromPath, toPath ] = arg.split(bindingDelimiter);
     return {
         fn: () => {
             const nextConfig = getLatestConfig();
-            const lastResult = getLatestResult();
-            configStore.push(Answers.deepSet(nextConfig, toPath, get(lastResult, fromPath)));
+            if (useResult) {
+                const lastResult = getLatestResult();
+                configStore.push(Answers.deepSet(nextConfig, toPath, get(lastResult, fromPath)));
+            } else {
+                configStore.push(Answers.deepSet(nextConfig, toPath, get(nextConfig, fromPath)));
+            }
             return;
         },
-        name: bindingNamespace,
+        name: arg,
         namespace: bindingNamespace
     };
 };
@@ -193,8 +199,11 @@ const QueueGroup = (targets, arg, name) => {
             return [ ...a, ...QueueGroup(targets, n) ];
           }, []);
     }
-    if (typeof arg === 'string' && isBinding(arg)) {
-        return [ QueueBinding(arg) ];
+    if (typeof arg === 'string' && isBinding(arg) && !isConfigOp(arg)) {
+        return [ QueueBinding(arg, true) ];
+    }
+    if (typeof arg === 'string' && isBinding(arg) && isConfigOp(arg)) {
+        return [ QueueBinding(arg.slice(1)) ];
     }
     if (typeof arg === 'string') {
         return QueueGroup(targets, targets[arg], arg);
@@ -213,16 +222,16 @@ const Queue = (targets, argv) => argv
         []);
 
 const Prompts = (argv, queue) => {
-    const bindingsTo = argv.reduce((acc, v) =>
-        (new RegExp(`.+${bindingDelimiter}.+`).test(v))
-            ? [ ...acc, v.split(bindingDelimiter)[1] ]
+    const bindingsTo = uniqBy(flattenDeep(queue)).reduce((acc, { name, namespace }) =>
+        (namespace === bindingNamespace)
+            ? [ ...acc, name.replace('@', '').split(bindingDelimiter)[1] ]
             : acc,
         []);
     return uniqBy(flattenDeep(queue)
         .reduce((acc, entry) => entry.prompts
-                ? [ ...acc, ...entry.prompts ]
-                : acc,
-            []), 'name')
+             ? [ ...acc, ...entry.prompts ]
+             : acc,
+        []), 'name')
         .filter((p) => !bindingsTo.includes(p.name));
 };
 
@@ -230,7 +239,7 @@ function UnitOfWork(unit) {
     const config = getLatestConfig();
     if (typeof unit.fn === 'function') return handleResult(unit.name, unit.namespace, unit.fn(config[unit.namespace] || {}, Print(unit.fn.label || unit.name)))
         .then(r => ({ silent: !!unit.fn.silent, label: unit.fn.label || unit.name, value: r, stream: !!(r||{}).__stream__ }))
-        .then(r => r.stream || printer(r));
+        .then(r => r.stream || unit.namespace === bindingNamespace || printer(r));
     if (Array.isArray(unit)) return Promise.all(unit.map((entry) =>
         UnitOfWork(entry, config)));
     return;
