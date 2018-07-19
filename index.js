@@ -241,7 +241,7 @@ function UnitOfWork(unit) {
         .then(r => ({ silent: !!unit.fn.silent, label: unit.fn.label || unit.name, value: r, stream: !!(r||{}).__stream__ }))
         .then(r => r.stream || unit.namespace === bindingNamespace || printer(r));
     if (Array.isArray(unit)) return Promise.all(unit.map((entry) =>
-        UnitOfWork(entry, config)));
+        UnitOfWork(entry)));
     return;
 }
 
