@@ -2,49 +2,49 @@
 
 module.exports = Targets;
 
-const os = require('os');
-const chalk = require('chalk');
+// deps
 const { get, set, uniqBy, isObject, flattenDeep } = require('lodash');
 const Answers = require('answers');
 const streamToPromise = require('stream-to-promise');
 const inquirer = require('inquirer');
 const LineWrapper = require('stream-line-wrapper');
 
-const bindingNamespace = '__binding__';
-const bindingDelimiter = '::';
-const opPrefix = '@';
-const opDelimiter = '/';
-const clone = (v) => JSON.parse(JSON.stringify(v));
-const orObject = (v) => v == null ? {} : v;
-const rKey = Symbol.for('targets-result-store');
-const cKey = Symbol.for('targets-config-store');
-const resultStore = global[rKey] = [];
-const configStore = global[cKey] = [];
-const getPreviousConfig = (n = 1) => clone(orObject(configStore[configStore.length - n]));
-const getLatestConfig = () => getPreviousConfig(1);
-const getPreviousResult = (n = 1) => clone(orObject(resultStore[resultStore.length - n]));
-const getLatestResult = () => getPreviousResult(1);
-//const restorePreviousConfig = (n = 1) => configStore.push(getPreviousConfig(n));
-//const restoreInitialConfig = () => configStore.push(clone(configStore[0]));
+// lib
+const {
+    BINDING_NS,
+    BINDING_DELIM,
+    OP_NS, OP_PREFIX,
+    OP_DELIM
+} = require('./lib/constants');
 
-const isOperation = (v) => new RegExp(`^${opPrefix}.+`).test(v);
-const isBinding = (v) => new RegExp(`.+${bindingDelimiter}.+`).test(v);
-const isResultBinding = (v) => isBinding(v) && !isOperation(v);
-const isConfigBinding = (v) => isOperation(v) && isBinding(v);
-const isTarget = (prev, v) => !/^--?/.test(prev || '') && !/^--?/.test(v);
+// predicates
+const {
+    isReservedNs,
+    isOperation,
+    isResultBinding,
+    isConfigBinding,
+    isTarget,
+    isPromise,
+    isReadableStream
+} = require('./lib/predicates');
 
-const isReadableStream = stream =>
-    stream !== null &&
-    typeof stream === 'object' &&
-    typeof stream.pipe === 'function' &&
-    stream.readable !== false &&
-    typeof stream._read === 'function' &&
-    typeof stream._readableState === 'object';
+// config store
+const {
+    configStore,
+    getLatestConfig
+} = require('./lib/store.config');
 
-const isPromise = (obj) => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+// result store
+const {
+    resultStore,
+    getLatestResult
+} = require('./lib/store.results');
+
+// print utils
+const { ansiLabel, Print, printer } = require('./lib/print');
 
 const handleResult = (name, namespace, result) => {
-    if (namespace === bindingNamespace) return Promise.resolve('');
+    if (isReservedNs(namespace)) return Promise.resolve('');
     if (result == null) {
         resultStore.push(set({}, name, result));
         return Promise.resolve('');
@@ -77,36 +77,6 @@ const handleResult = (name, namespace, result) => {
         return result;
     });
 };
-
-const ansiLabel = label =>
-    `${chalk.reset.white('[')}${chalk.reset.yellow(label)}${chalk.reset.white(']')}`;
-
-const maybeStringify = value => {
-    try {
-        return JSON.stringify(value, null, 4);
-    } catch (e) {
-        return value;
-    }
-};
-
-const print = (label, value, silent) => {
-    value != null && !silent
-        && console.log(ansiLabel(label),
-            (`${typeof value === 'string'
-                ? value
-                : maybeStringify(value)}`
-            .replace(new RegExp(`^${os.EOL}*`), '')
-            .replace(new RegExp(`${os.EOL}*$`), '')
-            .split(os.EOL)
-            .join(`\n${ansiLabel(label)} `)));
-};
-
-const Print = (label) => (value) => print(label, value);
-
-const printer = (value) =>
-    Array.isArray(value)
-        ? value.map(printer)
-        : print(value.label, value.value, value.silent);
 
 const NamespacedPrompts = (prompts, namespace) =>
     prompts.reduce((a, p) => {
@@ -175,7 +145,7 @@ const QueueFn = (fn, name) => {
 };
 
 const QueueBinding = (binding, useResult) => {
-    const [ fromPath, toPath ] = binding.split(bindingDelimiter);
+    const [ fromPath, toPath ] = binding.split(BINDING_DELIM);
     return {
         fn: () => {
             const nextConfig = getLatestConfig();
@@ -187,7 +157,7 @@ const QueueBinding = (binding, useResult) => {
             }
         },
         name: binding,
-        namespace: bindingNamespace
+        namespace: BINDING_NS
     };
 };
 
@@ -198,12 +168,12 @@ const operations = {
 };
 
 const QueueOperation = (op) => {
-    const [ opName, arg ] = op.split(opDelimiter);
+    const [ opName, arg ] = op.split(OP_DELIM);
     const opFn = operations[opName] || (() => 'unknown operation');
     return {
         fn: () => opFn(arg),
-        name: `${opPrefix}${opName}`,
-        namespace: bindingNamespace
+        name: `${OP_PREFIX}${opName}`,
+        namespace: OP_NS
     };
 };
 
@@ -218,14 +188,14 @@ const QueueGroup = (targets, arg, name) => {
     }
     if (typeof arg === 'string') {
         if (isResultBinding(arg)) return [ QueueBinding(arg, true) ];
-        if (isConfigBinding(arg)) return [ QueueBinding(arg.replace(opPrefix, '')) ];
-        if (isOperation(arg)) return [ QueueOperation(arg.replace(opPrefix, '')) ];
+        if (isConfigBinding(arg)) return [ QueueBinding(arg.replace(OP_PREFIX, '')) ];
+        if (isOperation(arg)) return [ QueueOperation(arg.replace(OP_PREFIX, '')) ];
         return QueueGroup(targets, targets[arg], arg);
     }
     if (typeof arg === 'function') {
         return [ QueueFn(arg, name) ];
     }
-    console.log('invalid target name in command');
+    console.log('invalid target in command:', arg);
     return [];
 };
 
@@ -238,8 +208,8 @@ const Queue = (targets, argv) => argv
 const Prompts = (argv, queue) => {
     // The time complexity of this function is completely insane. There must be a better way. Indicative of a design flaw and warrants further scrutiny.
     const bindingsTo = flattenDeep(queue).reduce((acc, { name, namespace }) =>
-        (namespace === bindingNamespace)
-            ? [ ...acc, name.replace(opPrefix, '').split(bindingDelimiter)[1] ]
+        (namespace === BINDING_NS)
+            ? [ ...acc, name.replace(OP_PREFIX, '').split(BINDING_DELIM)[1] ]
             : acc,
         []);
     return uniqBy(flattenDeep(queue)
@@ -248,7 +218,7 @@ const Prompts = (argv, queue) => {
                 // wherein we peer into the future to see what we should do... but at what cost... something is rotten in Denmark.
                 const prompts = entry.prompts.filter((prompt) => {
                     const namesSoFar = arr.slice(0, idx).map(({ name }) => name);
-                    if (!prompt.optional || namesSoFar.lastIndexOf(`${opPrefix}prompts-on`) > namesSoFar.lastIndexOf(`${opPrefix}prompts-off`)) return true;
+                    if (!prompt.optional || namesSoFar.lastIndexOf(`${OP_PREFIX}prompts-on`) > namesSoFar.lastIndexOf(`${OP_PREFIX}prompts-off`)) return true;
                 });
                 return [ ...acc, ...prompts ];
             }
@@ -262,7 +232,7 @@ function UnitOfWork(unit) {
     const config = getLatestConfig();
     if (typeof unit.fn === 'function') return handleResult(unit.name, unit.namespace, unit.fn(config[unit.namespace] || {}, Print(unit.fn.label || unit.name)))
         .then(r => ({ silent: !!unit.fn.silent, label: unit.fn.label || unit.name, value: r, stream: !!(r||{}).__stream__ }))
-        .then(r => r.stream || unit.namespace === bindingNamespace || printer(r));
+        .then(r => r.stream || isReservedNs(unit.namespace) || printer(r));
     if (Array.isArray(unit)) return Promise.all(unit.map((entry) =>
         UnitOfWork(entry)));
     return;

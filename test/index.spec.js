@@ -113,7 +113,7 @@ describe('Targets', () => {
             const { Targets } = setup({ answers });
             sandbox.spy(console, 'log');
             return Targets({ argv, targets: {} }).then(() => {
-                expect(console.log).to.have.been.calledWith("invalid target name in command");
+                expect(console.log).to.have.been.calledWith("invalid target in command:", sinon.match.any);
             });
         });
     });
