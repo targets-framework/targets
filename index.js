@@ -12,6 +12,8 @@ const LineWrapper = require('stream-line-wrapper');
 
 const bindingNamespace = '__binding__';
 const bindingDelimiter = '::';
+const opPrefix = '@';
+const opDelimiter = '/';
 const clone = (v) => JSON.parse(JSON.stringify(v));
 const orObject = (v) => v == null ? {} : v;
 const rKey = Symbol.for('targets-result-store');
@@ -25,6 +27,12 @@ const getLatestResult = () => getPreviousResult(1);
 //const restorePreviousConfig = (n = 1) => configStore.push(getPreviousConfig(n));
 //const restoreInitialConfig = () => configStore.push(clone(configStore[0]));
 
+const isOperation = (v) => new RegExp(`^${opPrefix}.+`).test(v);
+const isBinding = (v) => new RegExp(`.+${bindingDelimiter}.+`).test(v);
+const isResultBinding = (v) => isBinding(v) && !isOperation(v);
+const isConfigBinding = (v) => isOperation(v) && isBinding(v);
+const isTarget = (prev, v) => !/^--?/.test(prev || '') && !/^--?/.test(v);
+
 const isReadableStream = stream =>
     stream !== null &&
     typeof stream === 'object' &&
@@ -32,12 +40,6 @@ const isReadableStream = stream =>
     stream.readable !== false &&
     typeof stream._read === 'function' &&
     typeof stream._readableState === 'object';
-
-const isTarget = (last, v) => !/^--?/.test(last || '') && !/^--?/.test(v);
-
-const isConfigOp = (v) => new RegExp(`^@.+`).test(v);
-const isBinding = (v) => new RegExp(`.+${bindingDelimiter}.+`).test(v);
-//const isConfigBinding = (v) => isConfigOp(v) && isBinding(v);
 
 const isPromise = (obj) => !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
 
@@ -172,8 +174,8 @@ const QueueFn = (fn, name) => {
     return result;
 };
 
-const QueueBinding = (arg, useResult) => {
-    const [ fromPath, toPath ] = arg.split(bindingDelimiter);
+const QueueBinding = (binding, useResult) => {
+    const [ fromPath, toPath ] = binding.split(bindingDelimiter);
     return {
         fn: () => {
             const nextConfig = getLatestConfig();
@@ -183,9 +185,24 @@ const QueueBinding = (arg, useResult) => {
             } else {
                 configStore.push(Answers.deepSet(nextConfig, toPath, get(nextConfig, fromPath)));
             }
-            return;
         },
-        name: arg,
+        name: binding,
+        namespace: bindingNamespace
+    };
+};
+
+const operations = {
+    'prompts-on': () => {},
+    'prompts-off': () => {},
+    // 'fail-if-prompt': () => {} ... should this be operation? or just config? me thinks config. CI systems should fail if prompt is needed...
+};
+
+const QueueOperation = (op) => {
+    const [ opName, arg ] = op.split(opDelimiter);
+    const opFn = operations[opName] || (() => 'unknown operation');
+    return {
+        fn: () => opFn(arg),
+        name: `${opPrefix}${opName}`,
         namespace: bindingNamespace
     };
 };
@@ -199,13 +216,10 @@ const QueueGroup = (targets, arg, name) => {
             return [ ...a, ...QueueGroup(targets, n) ];
           }, []);
     }
-    if (typeof arg === 'string' && isBinding(arg) && !isConfigOp(arg)) {
-        return [ QueueBinding(arg, true) ];
-    }
-    if (typeof arg === 'string' && isBinding(arg) && isConfigOp(arg)) {
-        return [ QueueBinding(arg.slice(1)) ];
-    }
     if (typeof arg === 'string') {
+        if (isResultBinding(arg)) return [ QueueBinding(arg, true) ];
+        if (isConfigBinding(arg)) return [ QueueBinding(arg.replace(opPrefix, '')) ];
+        if (isOperation(arg)) return [ QueueOperation(arg.replace(opPrefix, '')) ];
         return QueueGroup(targets, targets[arg], arg);
     }
     if (typeof arg === 'function') {
@@ -222,15 +236,24 @@ const Queue = (targets, argv) => argv
         []);
 
 const Prompts = (argv, queue) => {
-    const bindingsTo = uniqBy(flattenDeep(queue)).reduce((acc, { name, namespace }) =>
+    // The time complexity of this function is completely insane. There must be a better way. Indicative of a design flaw and warrants further scrutiny.
+    const bindingsTo = flattenDeep(queue).reduce((acc, { name, namespace }) =>
         (namespace === bindingNamespace)
-            ? [ ...acc, name.replace('@', '').split(bindingDelimiter)[1] ]
+            ? [ ...acc, name.replace(opPrefix, '').split(bindingDelimiter)[1] ]
             : acc,
         []);
     return uniqBy(flattenDeep(queue)
-        .reduce((acc, entry) => entry.prompts
-             ? [ ...acc, ...entry.prompts ]
-             : acc,
+        .reduce((acc, entry, idx, arr) => {
+            if (entry.prompts) {
+                // wherein we peer into the future to see what we should do... but at what cost... something is rotten in Denmark.
+                const prompts = entry.prompts.filter((prompt) => {
+                    const namesSoFar = arr.slice(0, idx).map(({ name }) => name);
+                    if (!prompt.optional || namesSoFar.lastIndexOf(`${opPrefix}prompts-on`) > namesSoFar.lastIndexOf(`${opPrefix}prompts-off`)) return true;
+                });
+                return [ ...acc, ...prompts ];
+            }
+            return acc;
+            },
         []), 'name')
         .filter((p) => !bindingsTo.includes(p.name));
 };
