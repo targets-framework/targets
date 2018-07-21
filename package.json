@@ -25,7 +25,8 @@
     "inquirer": "^6.0.0",
     "lodash": "^4.17.10",
     "stream-line-wrapper": "0.1.1",
-    "stream-to-promise": "^2.2.0"
+    "stream-to-promise": "^2.2.0",
+    "strip-ansi": "^4.0.0"
   },
   "devDependencies": {
     "axios": "0.16.1",
