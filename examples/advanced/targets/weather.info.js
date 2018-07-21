@@ -1,7 +1,7 @@
 'use strict';
 
 const weatherJs = require('weather-js');
-const Promise = require('bluebird');
+const { promisify } = require('util');
 
 function weather(answers, print) {
     const options = {
@@ -9,7 +9,7 @@ function weather(answers, print) {
         degreeType: 'F'
     };
     print('Checking the weather...');
-    return Promise.promisify(weatherJs.find)(options)
+    return promisify(weatherJs.find)(options)
         .then((data = []) => data[0]
             ? data
             : 'Location not found');

@@ -2,7 +2,6 @@
 
 const os = require('os');
 const bytes = require('bytes');
-const Promise = require('bluebird');
 
 function memory() {
     return Promise.resolve(bytes(os.freemem()));
