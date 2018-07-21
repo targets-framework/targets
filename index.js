@@ -3,7 +3,7 @@
 module.exports = Targets;
 
 const Answers = require('answers');
-const ConfigStore = require('./lib/store/Config');
+const { push:pushConfig } = require('./lib/store/Config');
 const Queue = require('./lib/factory/Queue');
 const InitialPrompt = require('./lib/factory/InitialPrompt');
 const Scheduler = require('./lib/factory/Scheduler');
@@ -23,7 +23,7 @@ async function Targets(options = {}) {
     const prompts = Prompts(queue);
     const answers = Answers({ name, prompts });
     const config = await answers.get();
-    ConfigStore.push(config);
+    pushConfig(config);
     /* eslint-disable-next-line */
     for await (const result of Scheduler(queue)) {}
 }
