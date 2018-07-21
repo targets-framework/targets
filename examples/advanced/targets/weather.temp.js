@@ -1,35 +1,15 @@
 'use strict';
 
-const weatherJs = require('weather-js');
-const Promise = require('bluebird');
-const _ = require('lodash');
+const get = require('lodash/get');
 
-function getTemp(results) {
-    if (results.length) {
-        return _.result(results, '[0].current.temperature');
+function weatherTemp({ data }) {
+    if (data.length) {
+        return get(data, '[0].current.temperature');
     } else {
         return 'Location not found';
     }
 }
 
-function weather(answers) {
-    const options = {
-        search: answers.location,
-        degreeType: 'F'
-    };
-    return Promise.promisify(weatherJs.find)(options)
-        .then(getTemp);
-}
+weatherTemp.label = "Current Temperature";
 
-weather.label = "Current Temperature";
-
-weather.prompts = [
-    {
-        type: "input",
-        name: "location",
-        message: "Enter your location",
-        default: "Chicago"
-    }
-];
-
-module.exports = weather;
+module.exports = weatherTemp;
