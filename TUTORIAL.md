@@ -466,7 +466,7 @@ With this structure in place, so long as each file module inside the `./targets`
 
 ## More Examples
 
-Review the [./examples/advanced](https://github.com/machellerogden/targets/tree/master/examples/advanced) directory for more examples.
+Review the [./examples](https://github.com/machellerogden/targets/tree/master/examples) directory for more examples.
 
 ## License
 
