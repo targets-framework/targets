@@ -1,0 +1,317 @@
+kind: shell
+tty: 'argv[0] === "docker" && argv[1] === "run" && interactive'
+spec:
+  - docker
+  - run
+  - name: add-host
+    type: option
+    optional: true
+  - name: attach
+    type: option
+    optional: true
+  - name: blkio-weight
+    type: option
+    optional: true
+  - name: blkio-weight-device
+    type: option
+    optional: true
+  - name: cap-add
+    type: option
+    optional: true
+  - name: cap-drop
+    type: option
+    optional: true
+  - name: cgroup-parent
+    type: option
+    optional: true
+  - name: cidfile
+    type: option
+    optional: true
+  - name: cpu-count
+    type: option
+    optional: true
+  - name: cpu-percent
+    type: option
+    optional: true
+  - name: cpu-period
+    type: option
+    optional: true
+  - name: cpu-quota
+    type: option
+    optional: true
+  - name: cpu-rt-period
+    type: option
+    optional: true
+  - name: cpu-rt-runtime
+    type: option
+    optional: true
+  - name: cpu-shares
+    type: option
+    optional: true
+  - name: cpus
+    type: option
+    optional: true
+  - name: cpuset-cpus
+    type: option
+    optional: true
+  - name: cpuset-mems
+    type: option
+    optional: true
+  - name: detach
+    type: option
+    optional: true
+  - name: detach-keys
+    type: option
+    optional: true
+  - name: device
+    type: option
+    optional: true
+  - name: device-cgroup-rule
+    type: option
+    optional: true
+  - name: device-read-bps
+    type: option
+    optional: true
+  - name: device-read-iops
+    type: option
+    optional: true
+  - name: device-write-bps
+    type: option
+    optional: true
+  - name: device-write-iops
+    type: option
+    optional: true
+  - name: disable-content-trust
+    type: option
+    optional: true
+  - name: dns
+    type: option
+    optional: true
+  - name: dns-opt
+    type: option
+    optional: true
+  - name: dns-option
+    type: option
+    optional: true
+  - name: dns-search
+    type: option
+    optional: true
+  - name: entrypoint
+    type: option
+    optional: true
+  - name: env
+    type: option
+    optional: true
+  - name: env-file
+    type: option
+    optional: true
+  - name: expose
+    type: option
+    optional: true
+  - name: group-add
+    type: option
+    optional: true
+  - name: health-cmd
+    type: option
+    optional: true
+  - name: health-interval
+    type: option
+    optional: true
+  - name: health-retries
+    type: option
+    optional: true
+  - name: health-start-period
+    type: option
+    optional: true
+  - name: health-timeout
+    type: option
+    optional: true
+  - name: help
+    type: option
+    optional: true
+  - name: hostname
+    type: option
+    optional: true
+  - name: init
+    type: option
+    optional: true
+  - name: interactive
+    type: option
+    optional: true
+  - name: io-maxbandwidth
+    type: option
+    optional: true
+  - name: io-maxiops
+    type: option
+    optional: true
+  - name: ip
+    type: option
+    optional: true
+  - name: ip6
+    type: option
+    optional: true
+  - name: ipc
+    type: option
+    optional: true
+  - name: isolation
+    type: option
+    optional: true
+  - name: kernel-memory
+    type: option
+    optional: true
+  - name: label
+    type: option
+    optional: true
+  - name: label-file
+    type: option
+    optional: true
+  - name: link
+    type: option
+    optional: true
+  - name: link-local-ip
+    type: option
+    optional: true
+  - name: log-driver
+    type: option
+    optional: true
+  - name: log-opt
+    type: option
+    optional: true
+  - name: mac-address
+    type: option
+    optional: true
+  - name: memory
+    type: option
+    optional: true
+  - name: memory-reservation
+    type: option
+    optional: true
+  - name: memory-swap
+    type: option
+    optional: true
+  - name: memory-swappiness
+    type: option
+    optional: true
+  - name: mount
+    type: option
+    optional: true
+  - name: container-name
+    type: option
+    optional: true
+  - name: net
+    type: option
+    optional: true
+  - name: net-alias
+    type: option
+    optional: true
+  - name: network
+    type: option
+    optional: true
+  - name: network-alias
+    type: option
+    optional: true
+  - name: no-healthcheck
+    type: option
+    optional: true
+  - name: oom-kill-disable
+    type: option
+    optional: true
+  - name: oom-score-adj
+    type: option
+    optional: true
+  - name: pid
+    type: option
+    optional: true
+  - name: pids-limit
+    type: option
+    optional: true
+  - name: platform
+    type: option
+    optional: true
+  - name: privileged
+    type: option
+    optional: true
+  - name: publish
+    type: option
+    optional: true
+  - name: publish-all
+    type: option
+    optional: true
+  - name: read-only
+    type: option
+    optional: true
+  - name: restart
+    type: option
+    optional: true
+  - name: rm
+    type: option
+    optional: true
+  - name: runtime
+    type: option
+    optional: true
+  - name: security-opt
+    type: option
+    optional: true
+  - name: shm-size
+    type: option
+    optional: true
+  - name: sig-proxy
+    type: option
+    optional: true
+  - name: stop-signal
+    type: option
+    optional: true
+  - name: stop-timeout
+    type: option
+    optional: true
+  - name: storage-opt
+    type: option
+    optional: true
+  - name: sysctl
+    type: option
+    optional: true
+  - name: tmpfs
+    type: option
+    optional: true
+  - name: tty
+    type: option
+    optional: true
+  - name: ulimit
+    type: option
+    optional: true
+  - name: user
+    type: option
+    optional: true
+  - name: userns
+    type: option
+    optional: true
+  - name: uts
+    type: option
+    optional: true
+  - name: volume
+    type: option
+    optional: true
+  - name: volume-driver
+    type: option
+    optional: true
+  - name: volumes-from
+    type: option
+    optional: true
+  - name: workdir
+    type: option
+    optional: true
+  - name: tag
+    type: value
+    derived: true
+    template: "${registry ? `${registry}/` : ''}${name}:${version}"
+  - name: registry
+    type: variable
+  - name: name
+    type: variable
+  - name: version
+    default: latest
+    type: variable
+  - name: command
+    type: value
+    optional: true
+

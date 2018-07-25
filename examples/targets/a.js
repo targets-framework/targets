@@ -3,5 +3,5 @@
 module.exports = a;
 
 function a() {
-    return new Promise(r => setTimeout(() => (console.log('a'),r()), 500));
+    return new Promise(r => setTimeout(() => r('scheduler demo - run `./mycli c`'), 1000));
 }

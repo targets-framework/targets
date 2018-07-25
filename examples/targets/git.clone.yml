@@ -1,0 +1,8 @@
+kind: shell
+spec:
+  - git
+  - clone
+  - name: url
+    type: value
+  - name: dest
+    type: value

@@ -2,7 +2,6 @@
 'use strict';
 
 const Targets = require('..');
-const requireDir = require('require-dir');
-const targets = requireDir('./targets');
+const targets = Targets.load('./targets');
 
 Targets({ name: 'mycli', targets });
