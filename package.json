@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "answers": "^1.10.0",
+    "answers": "^1.10.1",
     "blessed": "^0.1.81",
     "blessed-xterm": "^1.1.19",
     "byline": "^5.0.0",
