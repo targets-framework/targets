@@ -128,5 +128,5 @@ Originally, Targets was inspired by GNU Make. Make was the original build tool. 
 
 ## License
 
-Apache-2.0
+MIT
 

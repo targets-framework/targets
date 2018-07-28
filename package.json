@@ -18,7 +18,7 @@
     "name": "Mac Heller-Ogden",
     "email": "mac@machellerogden.com"
   },
-  "license": "Apache-2.0",
+  "license": "MIT",
   "dependencies": {
     "answers": "^1.10.0",
     "blessed": "^0.1.81",
