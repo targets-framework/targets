@@ -31,4 +31,4 @@ async function Targets(options = {}) {
     for await (const result of Scheduler(name, queue)) {}
 }
 
-Targets.load = require('./lib/loader');
+Targets.load = require('./lib/load');

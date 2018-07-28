@@ -20,7 +20,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "answers": "^1.8.0",
+    "answers": "^1.10.0",
     "blessed": "^0.1.81",
     "blessed-xterm": "^1.1.19",
     "byline": "^5.0.0",
