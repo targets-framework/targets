@@ -2,6 +2,6 @@
 'use strict';
 
 const Targets = require('..');
-const targets = Targets.load('./targets');
+const targets = Targets.load('./targets/**');
 
 Targets({ name: 'mycli', targets });

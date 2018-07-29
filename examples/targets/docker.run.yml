@@ -1,5 +1,4 @@
 kind: shell
-tty: 'argv[0] === "docker" && argv[1] === "run" && interactive'
 spec:
   - docker
   - run
