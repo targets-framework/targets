@@ -31,7 +31,7 @@ async function Targets(options = {}) {
 
     pushConfig(config);
 
-    processTargetArgs(config['--']);
+    processTargetArgs(config);
 
     /* eslint-disable-next-line */
     for await (const result of Scheduler(name, queue)) {}
