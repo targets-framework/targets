@@ -5,7 +5,6 @@ module.exports = systemName;
 function systemName() {
     return require('child_process').spawn('whoami');
 }
-//systemName.filter = (result) => {
-    //return result.toUpperCase();
-//};
+
+systemName.filter = (result) => result.toUpperCase();
 systemName.label = "System Name";
