@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>localhost:1313/test/extending_targets/operations/</loc>
+    <lastmod>2018-08-01T16:50:16+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/background/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/extending_targets/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/prerequisites/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/installation/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/hello_world/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/config_part_1/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/config_part_2/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/bindings/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/composition/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/loaders/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/project_structure/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/more/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/learn/tty_mode/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/credits/</loc>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>localhost:1313/test/</loc>
+  </url>
+  
+</urlset>

@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = a;
+const { promisify } = require('util');
+const sleep = promisify(setTimeout);
+const a = () => sleep(1000).then(() => `scheduler demo - ${(''+Math.floor(Date.now()/1000)).slice(-1)}`);
 
-function a() {
-    return new Promise(r => setTimeout(() => r('scheduler demo - run `./mycli c`'), 1000));
-}
+module.exports = a;
