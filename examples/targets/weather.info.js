@@ -3,9 +3,9 @@
 const weatherJs = require('weather-js');
 const { promisify } = require('util');
 
-function weather(answers, print) {
+function weather({ location = 'Chicago' }, print) {
     const options = {
-        search: answers.location,
+        search: location,
         degreeType: 'F'
     };
     print('Checking the weather...');
