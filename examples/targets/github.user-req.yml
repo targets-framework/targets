@@ -1,0 +1,9 @@
+kind: request
+config:
+  method: GET
+spec:
+  - name: url
+    derived: true
+    template: 'https://api.github.com/users/${username}'
+  - name: username
+    type: variable
