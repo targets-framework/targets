@@ -15,5 +15,11 @@
                 ]
             }
         ]
+    },
+    "profile-a": {
+        "location": "Seattle"
+    },
+    "profile-b": {
+        "location": "Chicago"
     }
 }
