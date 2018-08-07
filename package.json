@@ -10,9 +10,10 @@
     "coverage": "rm -rf ./coverage && ./node_modules/.bin/nyc npm test",
     "check-coverage": "npm run coverage && ./node_modules/.bin/nyc check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
   },
+  "homepage": "https://targets-framework.github.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/machellerogden/targets.git"
+    "url": "https://github.com/targets-framework/targets.git"
   },
   "author": {
     "name": "Mac Heller-Ogden",
@@ -57,6 +58,7 @@
     "test"
   ],
   "engines": {
-    "node": ">=10.6.0"
+    "node": ">=10.6.0",
+    "npm": ">=5.0.0"
   }
 }
