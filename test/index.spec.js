@@ -19,11 +19,8 @@ describe('Targets', () => {
         sandbox.restore();
     });
 
-    function setup(options) {
-        const { answers = {} } = options;
-        const answersStub = {
-            get: () => {}
-        };
+    function setup({ answers = {} }) {
+        const answersStub = { get: () => {} };
         sandbox.stub(answersStub, 'get').resolves(answers);
         const Targets = proxyquire('..', { answers: () => answersStub });
         return { Targets, answersStub };
@@ -40,28 +37,31 @@ describe('Targets', () => {
             expect(answersStub.get).to.have.been.called;
         });
     });
+
     describe('chosen targets', () => {
+
         it('should be invoked', () => {
             const argv = [ 'foo', 'bar' ];
             const answers = {
                 _: argv
             };
             const { Targets } = setup({ answers });
-            const foo = sandbox.stub().returns("foo");
-            foo.label = "Foo";
-            const bar = sandbox.stub().returns("bar");
-            bar.label = "Bar";
+            const foo = sandbox.stub().returns('foo');
+            foo.label = 'Foo';
+            const bar = sandbox.stub().returns('bar');
+            bar.label = 'Bar';
             return Targets({ argv, targets: { foo, bar } }).then(() => {
                 expect(foo).to.have.been.called;
                 expect(bar).to.have.been.called;
             });
         });
+
         it('should be invoked with options from answers', () => {
             const fooOptions = {
-                fooProp: "fooValue"
+                fooProp: 'fooValue'
             };
             const barOptions = {
-                barProp: "barValue"
+                barProp: 'barValue'
             };
             const argv = [ 'foo', 'bar' ];
             const answers = {
@@ -70,31 +70,18 @@ describe('Targets', () => {
                 bar: barOptions
             };
             const { Targets } = setup({ answers });
-            const foo = sandbox.stub().returns("foo");
-            foo.label = "Foo";
-            const bar = sandbox.stub().returns("bar");
-            bar.label = "Bar";
+            const foo = sandbox.stub().returns('foo');
+            foo.label = 'Foo';
+            const bar = sandbox.stub().returns('bar');
+            bar.label = 'Bar';
             return Targets({ argv, targets: { foo, bar } }).then(() => {
                 expect(foo).to.have.been.calledWithMatch(fooOptions);
                 expect(bar).to.have.been.calledWithMatch(barOptions);
             });
         });
-        it.skip('should do something if a targets rejects', () => {
-            const answers = {
-                _: [ 'foo', 'bar' ]
-            };
-            const { Targets } = setup({ answers });
-            const foo = sandbox.stub().rejects();
-            foo.label = "Foo";
-            const bar = sandbox.stub().rejects();
-            bar.label = "Bar";
-            sandbox.spy(console, 'log');
-            return Targets({ targets: { foo, bar } }).then(() => {
-                expect(console.log).to.have.been.calledWith(sinon.match(/something/));
-            });
-        });
+
         it('should use function name if no label found', () => {
-            const argv = [ 'foo', 'bar' ];
+            const argv = [ 'foo' ];
             const answers = {
                 _: argv
             };
@@ -105,16 +92,84 @@ describe('Targets', () => {
                 expect(console.log).to.have.been.calledWith(sinon.match(/foo/), sinon.match.any);
             });
         });
-        it('should log if target not found', () => {
+
+        it('should reject with an error when target is not found', () => {
             const argv = [ 'foo' ];
             const answers = {
                 _: argv
             };
             const { Targets } = setup({ answers });
-            sandbox.spy(console, 'log');
-            return Targets({ argv, targets: {} }).then(() => {
-                expect(console.log).to.have.been.calledWith('invalid target in command');
+            return expect(Targets({ argv, targets: {} })).to.be.rejectedWith(Error, 'invalid target in command');
+        });
+    });
+
+    describe('binding operations', () => {
+
+        it('bind should use result at given path of a target to extend config for another target', () => {
+            const fooResult = { fooProp: 'fooValue' };
+            const barOptions = { barProp: 'barValue' };
+            const argv = [ 'foo', '@bind/foo.fooProp::bar.barProp', 'bar' ];
+            const answers = {
+                _: argv,
+                bar: barOptions
+            };
+            const { Targets } = setup({ answers });
+            const foo = sandbox.stub().returns(fooResult);
+            const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
+            return Targets({ argv, targets: { foo, bar } }).then(() => {
+                expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' });
             });
         });
+
+        it('rebind should use result at given path of a target to extend config for another target', () => {
+            const fooOptions = { fooProp: 'fooValue' };
+            const barOptions = { barProp: 'barValue' };
+            const argv = [ '@rebind/foo.fooProp::bar.barProp', 'bar' ];
+            const answers = {
+                _: argv,
+                foo: fooOptions,
+                bar: barOptions
+            };
+            const { Targets } = setup({ answers });
+            const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
+            return Targets({ argv, targets: { bar } }).then(() => {
+                expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' });
+            });
+        });
+
+        describe('binding shorthand', () => {
+            it('bind shorthand should use result at given path of a target to extend config for another target', () => {
+                const fooResult = { fooProp: 'fooValue' };
+                const barOptions = { barProp: 'barValue' };
+                const argv = [ 'foo', 'foo.fooProp::bar.barProp', 'bar' ];
+                const answers = {
+                    _: argv,
+                    bar: barOptions
+                };
+                const { Targets } = setup({ answers });
+                const foo = sandbox.stub().returns(fooResult);
+                const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
+                return Targets({ argv, targets: { foo, bar } }).then(() => {
+                    expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' });
+                });
+            });
+
+            it('rebind shorthand should use result at given path of a target to extend config for another target', () => {
+                const fooOptions = { fooProp: 'fooValue' };
+                const barOptions = { barProp: 'barValue' };
+                const argv = [ '@foo.fooProp::bar.barProp', 'bar' ];
+                const answers = {
+                    _: argv,
+                    foo: fooOptions,
+                    bar: barOptions
+                };
+                const { Targets } = setup({ answers });
+                const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
+                return Targets({ argv, targets: { bar } }).then(() => {
+                    expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' });
+                });
+            });
+        });
+
     });
 });
