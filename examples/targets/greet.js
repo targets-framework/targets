@@ -1,6 +1,6 @@
 'use strict';
 
-function greet({ name }) {
+function greet({ name = 'World' }) {
     return `Hello, ${name}!`;
 }
 greet.label = 'Greet';

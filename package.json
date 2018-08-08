@@ -21,7 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "answers": "^1.11.2",
+    "answers": "1.12.0",
     "axios": "^0.18.0",
     "blessed": "^0.1.81",
     "blessed-xterm": "^1.1.19",
@@ -36,7 +36,7 @@
     "require-dir": "^1.0.0",
     "stream-line-wrapper": "0.1.1",
     "stream-to-promise": "^2.2.0",
-    "sugarmerge": "0.0.5",
+    "sugarmerge": "0.1.0",
     "vm2": "^3.6.2"
   },
   "devDependencies": {
