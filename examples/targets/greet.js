@@ -1,8 +1,5 @@
 'use strict';
 
-function greet({ name = 'World' }) {
-    return `Hello, ${name}!`;
-}
-greet.label = 'Greet';
+const greet = ({ name = 'World' }) => `Hello, ${name}!`;
 
 module.exports = greet;

@@ -34,29 +34,35 @@ const InitialPrompt = require('./lib/InitialPrompt');
 const Scheduler = require('./lib/Scheduler');
 const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
+const builtinLoaders = require('./lib/loaders');
 
-const { push:pushConfig } = require('./lib/store/Config');
-const { loadFromOptions:loadSettingsFromOptions } = require('./lib/store/Setting');
+const { config: { set:setConfig } } = require('./lib/Store');
+const { loadFromOptions:loadSettingsFromOptions } = require('./lib/Setting');
 
 async function Targets(options = {}) {
 
     const {
         name = getName(),
         targets = {},
-        operations:ops = {}, // here be dragons...
+
+        // here be dragons...
+        operations:customOperations = {},
+        loaders:customLoaders = {},
+
         argv = process.argv.slice(2)
     } = options;
 
     process.title = name;
 
     const args = await InitialPrompt({ targets, argv });
-    const operations = { ...builtinOps, ...ops };
-    const queue = Queue({ targets, operations, args });
+    const operations = { ...builtinOps, ...customOperations };
+    const loaders = { ...builtinLoaders, ...customLoaders };
+    const queue = Queue({ targets, operations, loaders, args });
     const prompts = Prompts(queue);
     const answers = Answers({ name, prompts });
     const config = await answers.get();
 
-    pushConfig(config);
+    setConfig(config);
     loadSettingsFromOptions(config);
 
     /* eslint-disable-next-line */

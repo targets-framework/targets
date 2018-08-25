@@ -7,8 +7,8 @@
     "lint": "./node_modules/.bin/eslint .",
     "test": "./node_modules/.bin/mocha \"test/**/*.spec.js\"",
     "watch": "npm run test -- --watch",
-    "coverage": "rm -rf ./coverage && ./node_modules/.bin/nyc npm test",
-    "check-coverage": "npm run coverage && ./node_modules/.bin/nyc check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
+    "coverage": "rm -rf ./coverage && ./node_modules/.bin/nyc --reporter=html --reporter=lcov npm test",
+    "coverage:check": "npm run coverage && ./node_modules/.bin/nyc check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
   },
   "homepage": "https://targets-framework.github.io",
   "repository": {
@@ -21,7 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "answers": "1.12.0",
+    "answers": "^1.12.1",
     "axios": "^0.18.0",
     "blessed": "^0.1.81",
     "blessed-xterm": "^1.1.19",
@@ -33,10 +33,9 @@
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.10",
     "mem": "^3.0.1",
-    "require-dir": "^1.0.0",
     "stream-line-wrapper": "0.1.1",
     "stream-to-promise": "^2.2.0",
-    "sugarmerge": "0.1.0",
+    "sugarmerge": "0.1.1",
     "vm2": "^3.6.2"
   },
   "devDependencies": {

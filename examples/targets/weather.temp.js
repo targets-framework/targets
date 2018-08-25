@@ -2,14 +2,10 @@
 
 const get = require('lodash/get');
 
-function weatherTemp({ data }) {
-    if (data.length) {
-        return get(data, '[0].current.temperature');
-    } else {
-        return 'Location not found';
-    }
-}
+const weatherTemp = ({ data }) => data.length
+    ? get(data, '[0].current.temperature')
+    : 'Location not found';
 
-weatherTemp.label = "Current Temperature";
+weatherTemp.label = 'Current Temperature';
 
 module.exports = weatherTemp;

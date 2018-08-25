@@ -1,7 +1,5 @@
 'use strict';
 
-function logger(config) {
-    return config;
-}
+const logger = (config) => config;
 
 module.exports = logger;

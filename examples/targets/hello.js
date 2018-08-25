@@ -1,2 +1,3 @@
 'use strict';
-module.exports = [ 'system.name', '@bind/system.name::greet.name', 'greet' ];
+
+module.exports = [ 'system.name', '@result.system.name::config.greet.name', 'greet' ];

@@ -3,10 +3,10 @@ config:
   greet:
     name: Mac
 predicates:
-  - logger.foo
+- config.logger.foo
 spec:
-  - greet
-  - greet
-  - greet
-  - greet
-  - greet
+- greet
+- greet
+- greet
+- greet
+- greet

@@ -2,10 +2,8 @@
 
 const get = require('lodash/get');
 
-function weatherSky({ data }) {
-    return get(data, '[0].current.skytext');
-}
+const weatherSky = ({ data }) => get(data, '[0].current.skytext');
 
-weatherSky.label = "Current Weather";
+weatherSky.label = 'Current Weather';
 
 module.exports = weatherSky;

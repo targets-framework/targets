@@ -1,76 +1,76 @@
 kind: shell
 spec:
-  - docker
-  - build
-  - name: tag
-    type: option
-    derived: true
-    template: "${registry ? `${registry}/` : ''}${name}:${version}"
-  - name: registry
-    type: variable
-  - name: name
-    type: variable
-  - name: version
-    default: latest
-    type: variable
-  - name: add-host
-    optional: true
-  - name: build-arg
-    optional: true
-  - name: cache-from
-    optional: true
-  - name: cgroup-parent
-    optional: true
-  - name: compress
-    optional: true
-  - name: cpu-period
-    optional: true
-  - name: cpu-quota
-    optional: true
-  - name: cpu-shares
-    optional: true
-  - name: cpuset-cpus
-    optional: true
-  - name: cpuset-mems
-    optional: true
-  - name: disable-content-trust
-    optional: true
-  - name: force-rm
-    optional: true
-  - name: iidfile
-    optional: true
-  - name: isolation
-    optional: true
-  - name: label
-    optional: true
-  - name: memory
-    optional: true
-  - name: memory-swap
-    optional: true
-  - name: network
-    optional: true
-  - name: no-cache
-    optional: true
-  - name: platform
-    optional: true
-  - name: pull
-    optional: true
-  - name: quiet
-    optional: true
-  - name: rm
-    optional: true
-  - name: security-opt
-    optional: true
-  - name: shm-size
-    optional: true
-  - name: squash
-    optional: true
-  - name: stream
-    optional: true
-  - name: target
-    optional: true
-  - name: ulimit
-    optional: true
-  - name: context
-    type: value
-    default: .
+- docker
+- build
+- name: tag
+  argType: option
+  derived: true
+  template: "${registry ? `${registry}/` : ''}${name}:${version}"
+- name: registry
+  argType: variable
+- name: name
+  argType: variable
+- name: version
+  default: latest
+  argType: variable
+- name: add-host
+  optional: true
+- name: build-arg
+  optional: true
+- name: cache-from
+  optional: true
+- name: cgroup-parent
+  optional: true
+- name: compress
+  optional: true
+- name: cpu-period
+  optional: true
+- name: cpu-quota
+  optional: true
+- name: cpu-shares
+  optional: true
+- name: cpuset-cpus
+  optional: true
+- name: cpuset-mems
+  optional: true
+- name: disable-content-trust
+  optional: true
+- name: force-rm
+  optional: true
+- name: iidfile
+  optional: true
+- name: isolation
+  optional: true
+- name: label
+  optional: true
+- name: memory
+  optional: true
+- name: memory-swap
+  optional: true
+- name: network
+  optional: true
+- name: no-cache
+  optional: true
+- name: platform
+  optional: true
+- name: pull
+  optional: true
+- name: quiet
+  optional: true
+- name: rm
+  optional: true
+- name: security-opt
+  optional: true
+- name: shm-size
+  optional: true
+- name: squash
+  optional: true
+- name: stream
+  optional: true
+- name: target
+  optional: true
+- name: ulimit
+  optional: true
+- name: context
+  argType: value
+  default: .

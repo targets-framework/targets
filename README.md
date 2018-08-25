@@ -80,7 +80,7 @@ function whoami() {
 ...you can bind the output of any function to another like so...
 
 ```sh
-$ ./index.js whoami whoami::greet.name greet
+$ ./index.js whoami @result.whoami::config.greet.name greet
 [whoami] jane
 [greet example] Hello, jane!
 ```
