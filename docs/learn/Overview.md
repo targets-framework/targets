@@ -57,20 +57,20 @@ config:
     depth: 1
     single-branch: true
 spec:
-  - '@bind/config.name::config.docker.name'
+  - '@config.name::config.docker.name'
   - deploy.select
-  - '@bind/result.deploy.select.refspec::config.git.branch'
+  - '@result.deploy.select.refspec::config.git.branch'
   - mktemp
-  - '@bind/result.mktemp::config.git.directory'
-  - '@bind/result.mktemp::config.docker.context'
+  - '@result.mktemp::config.git.directory'
+  - '@result.mktemp::config.docker.context'
   - git.clone
   - docker.build
   - docker.tag
   - deploy.confirm
   - '@proceed-when/deploy.confirm.ready'
   - docker.push
-  - '@bind-to/config.profile-a::config.k8s.apply,@bind-to/config.profile-b::config.k8s.apply'
-  - '@bind-to/config.profile-a::config.k8s.verify,@bind-to/config.profile-b::config.k8s.verify'
+  - '@bind-to/config.profile-a::k8s.apply,@bind-to/config.profile-b::k8s.apply'
+  - '@bind-to/config.profile-a::k8s.verify,@bind-to/config.profile-b::k8s.verify'
 ```
 
 Here's a breakdown:
