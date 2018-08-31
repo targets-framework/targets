@@ -1,0 +1,18 @@
+root: ./docs/
+
+structure:
+  readme: README.md
+
+redirects:
+  learn: learn/Overview.md
+  learn/Overview: learn/Prerequisites.md
+  learn/Prerequisites: learn/Installation.md
+  learn/Installation: learn/Hello_World.md
+  learn/Hello_World: learn/Config_1.md
+  learn/Config_1: learn/Config_2.md
+  learn/Config_2: learn/Bindings.md
+  learn/Bindings: learn/Composition.md
+  learn/Composition: learn/Loaders.md
+  learn/Loaders: learn/Project_Structure.md
+  learn/Project_Structure: learn/More.md
+  learn/More: learn/TTY_Mode.md
