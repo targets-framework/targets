@@ -1,6 +1,6 @@
 # Composition
 
-> The examples in this section build on what you learned in the ["Bindings" tutorial]({{< relref "learn/bindings/_index.en.md" >}}).
+> The examples in this section build on what you learned in the ["Bindings" tutorial](Bindings.md).
 
 Targets are run sequentially by default, but when separated by comma they will be invoked in parallel.
 
@@ -126,9 +126,7 @@ sudo mycli tcpdump
 [tcpdump] output here...
 ```
 
-{{% notice info %}}
-Note that `sudo` is required for this example because tcpdump needs permission to attach to your network interface.
-{{% /notice %}}
+> Note that `sudo` is required for this example because tcpdump needs permission to attach to your network interface.
 
 If you were to compose this with other streams or asynchrous targets, the output will be interleaved but each line will always be prefixed with the reporting target's label.
 

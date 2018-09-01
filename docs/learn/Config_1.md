@@ -1,10 +1,10 @@
 # Config - Part 1
 
-> The examples in this section build on what you learned in the ["Hello, World!" tutorial]({{< relref "learn/hello_world/_index.en.md" >}}). If you're new to targets, start there.
+> The examples in this section build on what you learned in the ["Hello, World!" tutorial](Hello_World.md).
 
 Let's make something a little more useful than hello world.
 
-We'll reuse what you setup in the ["Hello, World!" tutorial]({{< relref "learn/hello_world/_index.en.md" >}}) but let's add a couple more dependencies.
+We'll reuse what you setup in the ["Hello, World!" tutorial](Hello_World.md) but let's add a couple more dependencies.
 
 ```
 npm i weather-js mem
@@ -62,7 +62,7 @@ mycli weather.sky weather.temp --weather.location Chicago
 [Current Temperature] 75
 ```
 
-We'll talk more about composition [later]({{< relref "learn/composition/_index.en.md" >}}). For now, let's take a look at other ways config can be declared and provided to our targets.
+We'll talk more about composition [later](Composition.md). For now, let's take a look at other ways config can be declared and provided to our targets.
 
 Consider the following:
 
@@ -122,9 +122,7 @@ mycli weather.sky weather.temp
 [weather.temp] 83
 ```
 
-{{% notice tip %}}
-Notice that even though you added these prompts to both of your targets, you only get prompted once. Each prompt is unique by name.
-{{% /notice %}}
+> Notice that even though you added these prompts to both of your targets, you only get prompted once. Each prompt is unique by name.
 
 If the needed config is provided, the user will not be prompted, just as before.
 

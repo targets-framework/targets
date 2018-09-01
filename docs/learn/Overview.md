@@ -24,9 +24,7 @@ All of the above referenced use cases are examples of complex workflows to which
 
 So, get ready to throw out all those overgrown POSIX scripts, ditch that late night python hackery, uninstall a few dozen Jenkins plugins and give Targets a spin!
 
-{{% notice tip %}}
-Targets isn't just about Node.js scripting—it can easily handle readable streams and pty instances. This means that any existing command-line tools you have can easily be incorporated into the workflows you design. There are extensions to make this easy! Keep reading to learn more.
-{{% /notice %}}
+> Targets isn't just about Node.js scripting—it can easily handle readable streams and pty instances. This means that any existing command-line tools you have can easily be incorporated into the workflows you design. There are extensions to make this easy! Keep reading to learn more.
 
 ## What is a "target"?
 
@@ -83,9 +81,7 @@ As you might surmise, the above example is only one piece of the puzzle. The ful
 
 That's enough to get you thinking—We'll leave this here for now as a mysterious example for the reader to consider.
 
-{{% notice info %}}
-As you start working through the tutorials in this chapter, most of the examples you'll see use JSON for task compositions. Spoiler alert! As you can see in the example above, Targets supports a special YML syntax. You'll learn about this towards the end of the tutorials.
-{{% /notice %}}
+> As you start working through the tutorials in this chapter, most of the examples you'll see use JSON for task compositions. Spoiler alert! As you can see in the example above, Targets supports a special YML syntax. You'll learn about this towards the end of the tutorials.
 
 -----
 

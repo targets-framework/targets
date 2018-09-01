@@ -1,6 +1,6 @@
 # Config - Part 2
 
-> The examples in this section build on what you learned in the ["Config - Part 1" tutorial]({{< relref "learn/config_part_1/_index.en.md" >}}).
+> The examples in this section build on what you learned in the ["Config - Part 1" tutorial](Config_1.md).
 
 Create a `.myclirc` file in the project's root directory which contains the following.
 
@@ -192,9 +192,7 @@ This `[+]` syntax is a special syntax which allows you to push items onto an arr
 
 There are two other special syntaxes you should become familiar with. Ending an options key with `[-]` will prepend to an existing array (or "unshift"), and ending an option key with `[<int>,<int>]` will splice an existing array.
 
-{{% notice tip %}}
-See [Array.prototype.splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) for splice documentation if you are not already familiar with it.
-{{% /notice %}}
+> See [Array.prototype.splice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) for splice documentation if you are not already familiar with it.
 
 Here's another example, this time using the splice syntax:
 

@@ -1,6 +1,6 @@
 # Bindings
 
-> The examples in this section build on what you learned in the ["Config - Part 2" tutorial]({{< relref "learn/config_part_2/_index.en.md" >}}).
+> The examples in this section build on what you learned in the ["Config - Part 2" tutorial](Config_2.md).
 
 #### First, a soapbox about about side-effects
 
@@ -46,9 +46,7 @@ require('targets')({
 });
 ```
 
-{{% notice tip %}}
-If you're coding along with the tutorial, you'll need to add [axios](https://www.npmjs.com/package/axios) to your project for the above example code to work (`npm i axios`).
-{{% /notice %}}
+> If you're coding along with the tutorial, you'll need to add [axios](https://www.npmjs.com/package/axios) to your project for the above example code to work (`npm i axios`).
 
 Let's run some example commands and use a binding on the targets we've implemented above...
 
@@ -67,9 +65,7 @@ mycli github.user @result.github.user.name::config.greet.name greet
 
 Here you'll see that the result from one target was "bound" to the config of another target.
 
-{{% notice tip %}}
-The right-side of the binding can use the special array notations you learned about in the [previous section]({{< relref "learn/config_part_2/_index.en.md" >}}): `[+]`, `[-]`, `[<int>,<int>]`.
-{{% /notice %}}
+> The right-side of the binding can use the special array notations you learned about in the [previous section]("learn/Config_2/.md"): `[+]`, `[-]`, `[<int>,<int>]`.
 
 Aside from binding results, targets also allows you to bind config from one namespace to another. For example...
 
