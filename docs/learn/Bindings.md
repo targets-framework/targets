@@ -4,17 +4,13 @@
 
 #### First, a soapbox about about side-effects
 
-You may be wonder why the framework isolates a target's config to a given namespace. Targets imposes this limitation in order to guarantee that your targets are composed without unintended side-effects. Each target represents a single functional component of your system, and each namespace represents the data provider for a single functional domain. This keeps the system in alignment with the [single responsibility principle](https://en.wikipedia.org/wiki/Single_responsibility_principle) so long as you define each target to do one and only one thing and configure each namespace to have well-defined boundaries.
+When the functional components of a system are allowed to reach outside their intended domain, and are allowed to implicitly affect other components, it can easily result in unintended and difficult to debug side-effects. To mitigate this problem, Targets isolates all configuration to namespaced domains of functionality and forces you to explicitly declare any interactions or interdependencies between these domains.
 
-> When functional components of a system are allowed to reach outside their intended domain, and allowed to implicitly affect other components, it can easily result in unintended and difficult to debug side-effects.
+To be clear, the framework's limitations in this regard are not intended to disallow side-effects, but rather to ensure that proper functional boundaries are maintained within the workflows you author. It's all about surfacing the complexity of inter-related components—all cross-functional relationships become explicit and obvious.
 
-Sounds safe, but terribly limiting, right? Don't worry! Targets can still share config across namespaces. Your intention to do so simply has to be explicitly declared.
+As you'll learn below, Targets provides an elegant solution to support this philosopy.
 
-> The framework's config limitations are not about dissallowing side-effects, but about making sure we surface the complexity of inter-related components. It's about making sure that those relationships are explicit and obvious.
-
-As you'll learn below, Targets provides an elegant solution for doing just this.
-
-Sometimes you will want the result from one target to be fed to the input for another target. Targets supports this via a mechanism called bindings.
+Sometimes you want the result from one target to be fed to the input for another target. Targets supports this via a mechanism called bindings.
 
 Consider the following:
 
