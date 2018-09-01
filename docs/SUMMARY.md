@@ -1,7 +1,8 @@
 # Summary
 
+* [Overview](Overview.md)
+
 * [Learn](learn/README.md)
-    * [Overview](learn/Overview.md)
     * [Prerequisites](learn/Prerequisites.md)
     * [Installation](learn/Installation.md)
     * [Hello World](learn/Hello_World.md)

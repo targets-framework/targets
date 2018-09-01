@@ -5,8 +5,7 @@ structure:
   summary: ./docs/SUMMARY.md
 
 redirects:
-  learn: learn/Overview.md
-  learn/Overview: learn/Prerequisites.md
+  overview: learn/Prerequisites.md
   learn/Prerequisites: learn/Installation.md
   learn/Installation: learn/Hello_World.md
   learn/Hello_World: learn/Config_1.md
