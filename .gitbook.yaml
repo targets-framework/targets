@@ -1,7 +1,8 @@
-root: ./docs/
+root: ./
 
 structure:
   readme: README.md
+  summary: ./docs/SUMMARY.md
 
 redirects:
   learn: learn/Overview.md

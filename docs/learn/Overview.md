@@ -1,12 +1,12 @@
 # Overview
 
-### What is Targets?
+## What is Targets?
 
 Targets takes the concept of function composition and surfaces it to the command-line. It enables you, the author of the next great CLI tool, to take many small single-purpose functions and to safely compose them into complex but reliable workflows using a succint declarative syntax.
 
 Use Targets to build common tooling for your team/users and reduce complex workflows into reliable tasks and which are simple to operate on.
 
-### Who would want to use Targets?
+## Who would want to use Targets?
 
 Developers, and in particular DevOps folk, and their ilk, will find it particularly useful. If you have some gnarly shell scripts sitting your `$HOME/bin` which you call on with any regularity, you should probably keep reading.
 
@@ -28,25 +28,25 @@ So, get ready to throw out all those overgrown POSIX scripts, ditch that late ni
 Targets isn't just about Node.js scripting—it can easily handle readable streams and pty instances. This means that any existing command-line tools you have can easily be incorporated into the workflows you design. There are extensions to make this easy! Keep reading to learn more.
 {{% /notice %}}
 
-### What is a "target"?
+## What is a "target"?
 
 **The short answer:** it's a task.
 
 **The technical answer:** At it's core, a target is just a JavaScript function which may return either null, a value, a [Promise](https://promisesaplus.com/), a [ReadableStream](https://nodejs.org/api/stream.html#stream_readable_streams) or a [pty](https://www.npmjs.com/package/node-pty) instance. But Targets also supports a declarative syntax written as either JSON or YML which allows you to create workflows out of shell commands and/or network requests without writing a single line of code.
 
-### What is a "composition"?
+## What is a "composition"?
 
 A core capability of Targets is to allow targets to be composed. When you declare a group of targets and give it a name, we call this a composition. You'll learn more about this as you work through the tutorials.
 
-### What is an "operation"?
+## What is an "operation"?
 
 Operations are meta-targets which handle side-effects. They provide an explicit/declarative mechanism for altering config, dictating control flow, toggling states/modes and otherwise affecting the behavior of your workflows.
 
-### What is a "spec"?
+## What is a "spec"?
 
 Targets can be written as code, or, for certain types of targets—such as shell commands or HTTP requests—targets can be declared. When declaring a target, we call this a "spec". Targets supports a few useful spec formats out-of-the-box, and supports custom loaders which enable you to implement your own spec interpreters.
 
-### What does a Targets implementation look like?
+## What does a Targets implementation look like?
 
 Some folks do best with an example. So, without any of the necessary context, let's swim straight to the deep end of the pool and consider the anatomy of a decently complex target composition.
 
@@ -57,12 +57,12 @@ config:
     depth: 1
     single-branch: true
 spec:
-  - '@config.name::config.docker.name'
+  - '@bind/config.name::config.docker.name'
   - deploy.select
-  - '@result.deploy.select.refspec::config.git.branch'
+  - '@bind/result.deploy.select.refspec::config.git.branch'
   - mktemp
-  - '@result.mktemp::config.git.directory'
-  - '@result.mktemp::config.docker.context'
+  - '@bind/result.mktemp::config.git.directory'
+  - '@bind/result.mktemp::config.docker.context'
   - git.clone
   - docker.build
   - docker.tag
