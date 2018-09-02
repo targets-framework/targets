@@ -70,8 +70,10 @@ describe('Targets', () => {
 
             const answers = {
                 _: argv,
-                foo: fooOptions,
-                bar: barOptions
+                config: {
+                    foo: fooOptions,
+                    bar: barOptions
+                }
             };
 
             const { Targets } = setup({ answers });
@@ -125,7 +127,9 @@ describe('Targets', () => {
 
             const answers = {
                 _: argv,
-                bar: barOptions
+                config: {
+                    bar: barOptions
+                }
             };
 
             const { Targets } = setup({ answers });
@@ -146,8 +150,10 @@ describe('Targets', () => {
 
             const answers = {
                 _: argv,
-                foo: fooOptions,
-                bar: barOptions
+                config: {
+                    foo: fooOptions,
+                    bar: barOptions
+                }
             };
 
             const { Targets } = setup({ answers });
@@ -169,7 +175,9 @@ describe('Targets', () => {
 
                 const answers = {
                     _: argv,
-                    bar: barOptions
+                    config: {
+                        bar: barOptions
+                    }
                 };
 
                 const { Targets } = setup({ answers });
@@ -190,8 +198,10 @@ describe('Targets', () => {
 
                 const answers = {
                     _: argv,
-                    foo: fooOptions,
-                    bar: barOptions
+                    config: {
+                        foo: fooOptions,
+                        bar: barOptions
+                    }
                 };
 
                 const { Targets } = setup({ answers });

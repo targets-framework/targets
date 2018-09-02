@@ -35,9 +35,7 @@ const Scheduler = require('./lib/Scheduler');
 const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
-
-const { config: { set:setConfig } } = require('./lib/Store');
-const { loadFromOptions:loadSettingsFromOptions } = require('./lib/Setting');
+const Store = require('./lib/Store');
 
 async function Targets(options = {}) {
 
@@ -59,11 +57,12 @@ async function Targets(options = {}) {
     const loaders = { ...builtinLoaders, ...customLoaders };
     const queue = Queue({ targets, operations, loaders, args });
     const prompts = Prompts(queue);
-    const answers = Answers({ name, prompts });
-    const config = await answers.get();
+    const answers = Answers({ name, prompts, prefix: 'config' });
+    const state = await answers.get();
+    const settings = Store.settingsFromArgv(state['--']);
 
-    setConfig(config);
-    loadSettingsFromOptions(config);
+    Store.Set()(state);
+    Store.setting.set(settings);
 
     /* eslint-disable-next-line */
     for await (const result of Scheduler(queue)) {}

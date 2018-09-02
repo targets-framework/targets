@@ -1,25 +1,27 @@
 {
-    "logger": {
-        "location": "Miami",
-        "collection": [
-            {
-                "people": [
-                    {
-                        "name": "Jane",
-                        "role": "Developer"
-                    },
-                    {
-                        "name": "Peter",
-                        "role": "Manager"
-                    }
-                ]
-            }
-        ]
-    },
-    "profile-a": {
-        "location": "Seattle"
-    },
-    "profile-b": {
-        "location": "Chicago"
+    "config": {
+        "logger": {
+            "location": "Miami",
+            "collection": [
+                {
+                    "people": [
+                        {
+                            "name": "Jane",
+                            "role": "Developer"
+                        },
+                        {
+                            "name": "Peter",
+                            "role": "Manager"
+                        }
+                    ]
+                }
+            ]
+        },
+        "profile-a": {
+            "location": "Seattle"
+        },
+        "profile-b": {
+            "location": "Chicago"
+        }
     }
 }
