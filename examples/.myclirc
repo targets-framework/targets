@@ -1,27 +1,20 @@
-{
-    "config": {
-        "logger": {
-            "location": "Miami",
-            "collection": [
-                {
-                    "people": [
-                        {
-                            "name": "Jane",
-                            "role": "Developer"
-                        },
-                        {
-                            "name": "Peter",
-                            "role": "Manager"
-                        }
-                    ]
-                }
-            ]
-        },
-        "profile-a": {
-            "location": "Seattle"
-        },
-        "profile-b": {
-            "location": "Chicago"
-        }
-    }
-}
+setting:
+  label-style: aligned
+
+config:
+  profile-a:
+    weather:
+      location: Portland
+
+  profile-b:
+    weather:
+      location: Chicago
+
+  logger:
+    location: Miami
+    collection:
+    - people:
+      - name: Jane
+        role: Developer
+      - name: Peter
+        role: Manager

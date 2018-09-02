@@ -21,7 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "answers": "^2.0.0",
+    "answers": "^2.0.2",
     "axios": "^0.18.0",
     "blessed": "^0.1.81",
     "blessed-xterm": "^1.1.19",
@@ -29,6 +29,7 @@
     "callsites": "^2.0.0",
     "chalk": "^2.4.1",
     "figures": "^2.0.0",
+    "flat": "^4.1.0",
     "globby": "^8.0.1",
     "inquirer": "^6.0.0",
     "js-yaml": "^3.12.0",

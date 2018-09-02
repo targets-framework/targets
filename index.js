@@ -56,13 +56,16 @@ async function Targets(options = {}) {
     const operations = { ...builtinOps, ...customOperations };
     const loaders = { ...builtinLoaders, ...customLoaders };
     const queue = Queue({ targets, operations, loaders, args });
-    const prompts = Prompts(queue);
-    const answers = Answers({ name, prompts, prefix: 'config' });
-    const state = await answers.get();
-    const settings = Store.settingsFromArgv(state['--']);
 
+    const answers = Answers({ name, prefix: 'config' });
+
+    Store.Set()(await answers.get());
+    const prompts = Prompts(queue);
+    answers.configure('prompts', prompts);
+
+    const state = await answers.get();
     Store.Set()(state);
-    Store.setting.set(settings);
+    Store.setting.set(Store.settingsFromArgv(state['--']));
 
     /* eslint-disable-next-line */
     for await (const result of Scheduler(queue)) {}

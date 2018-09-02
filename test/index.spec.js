@@ -16,7 +16,7 @@ describe('Targets', () => {
 
     function setup({ answers = {} }) {
 
-        const answersStub = { get: () => {} };
+        const answersStub = { get: () => {}, configure: () => {} };
         sandbox.stub(answersStub, 'get').resolves(answers);
 
         const Targets = proxyquire('..', { answers: () => answersStub });
