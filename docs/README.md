@@ -15,3 +15,5 @@
     * [More](learn/More.md)
     * [TTY Mode](learn/TTY_Mode.md)
 * [API](api/README.md)
+    * [Operations](api/Operations/README.md)
+        * [Built-In Operations](api/Operations/Built-In_Operations.md)
