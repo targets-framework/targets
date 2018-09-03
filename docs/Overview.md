@@ -4,37 +4,53 @@
 
 Targets takes the concept of function composition and surfaces it to the command-line. It enables you, the author of the next great CLI tool, to take many small single-purpose functions and to safely compose them into complex but reliable workflows using a succint declarative syntax.
 
-Use Targets to build common tooling for your team/users and reduce complex workflows into reliable tasks and which are simple to operate on.
+Use Targets to build common tooling for your team/users and to reduce complex workflows into reliable tasks and which are simple to operate on.
 
 ## Who would want to use Targets?
 
-Developers, and in particular DevOps folk, and their ilk, will find it particularly useful. If you have some gnarly shell scripts sitting your `$HOME/bin` which you call on with any regularity, you should probably keep reading.
+Targets is built for DevOps teams who write tooling for developers. But any developer with a love for automation and scripting will find that Targets has a lot to offer. Do you have a collection gnarly POSIX scripts sitting your `$HOME/bin`? If so, you should probably keep reading—Targets offers a better way forward.
 
-Consider some practical DevOps use cases:
+## Common Use Cases
+
+Use Targets to author tooling for:
 
 * scheduling builds and deployments
-* orchestrating containers
-* complex database migrations
+* operating on cloud resources
 * managing messages and dead-letter queues in event-based systems
 * auditing source control systems at scale
 * auditing dependencies in a micro-services architecture
 * managing configuration and secrets
 
-All of the above referenced use cases are examples of complex workflows to which Targets is ideally suited.
+To be clear, Targets doesn't do any of the above out-of-the-box but rather it enables you to quickly and easily author tools which can.
 
-So, get ready to throw out all those overgrown POSIX scripts, ditch that late night python hackery, uninstall a few dozen Jenkins plugins and give Targets a spin!
+## Project Goals
 
-> Targets isn't just about Node.js scripting—it can easily handle readable streams and pty instances. This means that any existing command-line tools you have can easily be incorporated into the workflows you design. There are extensions to make this easy! Keep reading to learn more.
+Targets is a feature-rich task scheduling platform which strives to provide a comprehensive solution to a host of common tooling challenges.
+
+- **Must be equally usable by humans and machines**.
+
+  - Tools build with Targets will present a straight-forward interface and display easy to understand output.
+  - Targets support multiple run modes in order to adapt the interface and output to the use case. I.E. A "dev" mode and a "tty" mode for humans as well as a "ci" mode for use on automation servers.
+
+- **Provide a declarative solution whenever it is reasonable to do so.**
+
+  - Targets currently supports the declaration of shell commands and HTTP requests out-of-the-box. Additionally, Targets allows for custom "loaders" to be provided via options— this allows users to author their own custom spec interpreters.
+  - Targets enforces that all side-effects which arise from the mutation of config or from global state change be declared via "operations".
+
+- **Make configuration easy and flexible**.
+
+  - So much work and thought has gone into how Targets considers and handles configuration that its config system was lifted out of the framework and now exists as two separate modules: [Answers](https://github.com/machellerogden/answers) and [Sugar Merge](https://github.com/machellerogden/sugarmerge). Configuration with Targets continues to evolve.
+
 
 ## What is a "target"?
 
 **The short answer:** it's a task.
 
-**The technical answer:** At it's core, a target is just a JavaScript function which may return either null, a value, a [Promise](https://promisesaplus.com/), a [ReadableStream](https://nodejs.org/api/stream.html#stream_readable_streams) or a [pty](https://www.npmjs.com/package/node-pty) instance. But Targets also supports a declarative syntax written as either JSON or YML which allows you to create workflows out of shell commands and/or network requests without writing a single line of code.
+**The technical answer:** At it's core, a target is just a JavaScript function which may return either null, a value, a [Promise](https://promisesaplus.com/), a [ReadableStream](https://nodejs.org/api/stream.html#stream_readable_streams) or a [pty](https://www.npmjs.com/package/node-pty) instance. Targets also supports a declarative syntax written as either JSON or YML which allows you to create workflows out of shell commands and/or network requests without writing a single line of code.
 
 ## What is a "composition"?
 
-A core capability of Targets is to allow targets to be composed. When you declare a group of targets and give it a name, we call this a composition. You'll learn more about this as you work through the tutorials.
+A core capability of Targets is to allow targets to be composed. When you declare a group of targets and give it a name, we call this a composition.
 
 ## What is an "operation"?
 
@@ -81,7 +97,7 @@ As you might surmise, the above example is only one piece of the puzzle. The ful
 
 That's enough to get you thinking—We'll leave this here for now as a mysterious example for the reader to consider.
 
-> As you start working through the tutorials in this chapter, most of the examples you'll see use JSON for task compositions. Spoiler alert! As you can see in the example above, Targets supports a special YML syntax. You'll learn about this towards the end of the tutorials.
+> As you start working through the tutorials in this chapter, most of the examples you'll see use JSON for task compositions. As you can see in the example above, Targets supports a special YML syntax. You'll learn about this towards the end of the tutorials.
 
 -----
 
