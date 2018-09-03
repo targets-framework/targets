@@ -5,8 +5,3 @@
 ## npm install
 
 To add targets as a dependency to your project, simply run `npm i targets`.
-
-```sh
-cd ./mycli
-npm i targets
-```
