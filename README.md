@@ -1,4 +1,4 @@
-# Targets
+# ![Targets](targets-logo.png?raw=true "Targets")
 
 > a task orchestration and composition framework
 
