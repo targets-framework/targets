@@ -15,5 +15,5 @@
 * [Usage and API](usage/README.md)
     * [System Requirements](usage/System_Requirements.md)
     * [Installation](usage/Installation.md)
-    * [Operations](usage/Operations/README.md)
-        * [Built-In Operations](api/Operations/Built-In_Operations.md)
+    * [Operations](usage/operations/README.md)
+        * [Built-In Operations](api/operations/Built_In_Operations.md)
