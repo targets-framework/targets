@@ -1,4 +1,4 @@
-# Prerequisites
+# System Requirements
 
 > Targets has not yet been tested on Linux or Windows. It probably works fine on Linux, but there's a good chance it does not work at all on Windows. Addressing this gap in testing is on the roadmap.
 
@@ -6,5 +6,3 @@
 
 * Node v10.3.0 or higher (v10.8.0 is recommended)
 * Mac OS X
-
-> A solid understanding of modern JavaScript syntax will help you follow along in the documentation, but is not strictly required.

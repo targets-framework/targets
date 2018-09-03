@@ -1,5 +1,7 @@
 # Hello, World!
 
+> Before getting started, please take a moment to review [system requirements](../usage/System_Requirements.md).
+
 Let's jump right in. Open up a terminal and complete the steps below. You should have a working targets CLI tool in just a few minutes.
 
 ```
