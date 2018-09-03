@@ -6,3 +6,5 @@
 
 * Node v10.3.0 or higher (v10.8.0 is recommended)
 * Mac OS X
+
+> If you landed here from the first page of the tutorial, here's [a link to take you back](../learn/Hello_World.md).

@@ -2,7 +2,7 @@
 
 * [Read Me](../README.md)
 * [Overview](Overview.md)
-* [Learn](learn/README.md)
+* [Learn Targets](learn/README.md)
     * [Hello World](learn/Hello_World.md)
     * [Config - Part 1](learn/Config_1.md)
     * [Config - Part 2](learn/Config_2.md)
