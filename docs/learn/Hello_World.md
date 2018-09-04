@@ -48,7 +48,7 @@ mycli greet
 You should see the following output:
 
 ```text
-[greet] Hello, World!
+greet →  Hello, World!
 ```
 
 The output from the `greet` target is prefixed with the target's name. As you add more targets to your tool, this prefix will let you know which output is coming from which target.
@@ -71,7 +71,7 @@ require('targets')({ targets: { greet } });
 This time when you run `mycli greet` you'd see the following output:
 
 ```text
-[Basic Example] Hello, World!
+Basic Example →  Hello, World!
 ```
 
 Every target receives an options object. Let's edit our `index.js` file again.
@@ -90,7 +90,7 @@ require('targets')({ targets: { greet } });
 In this case, if you run `mycli greet --greet.name Jane` you'd see the following output:
 
 ```text
-[Basic Example] Hello, Jane!
+Basic Example →  Hello, Jane!
 ```
 
 Notice how `name` has been namespaced with `greet` in the command line option. Instead of just `--name`, you had to specify `--greet.name`. This might seem tedious at first, but you'll understand why this is important as you learn more about the framework.

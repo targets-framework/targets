@@ -1,12 +1,10 @@
 # Config - Part 1
 
-> The examples in this section build on what you learned in the ["Hello, World!"
-> tutorial](Hello_World.md).
+> The examples in this section build on what you learned in the ["Hello, World!" tutorial](Hello_World.md).
 
 Let's make something a little more useful than hello world.
 
-We'll reuse what you setup in the ["Hello, World!" tutorial](Hello_World.md) but
-let's add a couple more dependencies.
+We'll reuse what you setup in the ["Hello, World!" tutorial](Hello_World.md) but let's add a couple more dependencies.
 
 ```
 npm i weather-js mem
@@ -45,30 +43,26 @@ require('targets')({
 });
 ```
 
-If you register multiple targets to a given namespace, as we've done above, they
-will share config.
+If you register multiple targets to a given namespace, as we've done above, they will share config.
 
-You can now specify location as `--weather.location Chicago` for both `mycli
-weather.sky` and `mycli weather.temp`. For example:
+You can now specify location as `--weather.location Chicago` for both `mycli weather.sky` and `mycli weather.temp`. For example:
 
 ```
 mycli weather.sky --weather.location Chicago
-[Current Weather] Partly Sunny
+Current Weather →  Partly Sunny
 mycli weather.temp --weather.location Chicago
-[Current Temperature] 75
+Current Temperature →  75
 ```
 
-This is a good point at which to demonstrate how tasks can be composed, or run
-together. Consider the following.
+This is a good point at which to demonstrate how tasks can be composed, or run together. Consider the following.
 
 ```
 mycli weather.sky weather.temp --weather.location Chicago
-[Current Weather] Partly Sunny
-[Current Temperature] 75
+Current Weather →  Partly Sunny
+Current Temperature →  75
 ```
 
-We'll talk more about composition [later](Composition.md). For now, let's take a
-look at other ways config can be declared and provided to our targets.
+We'll talk more about composition [later](Composition.md). For now, let's take a look at other ways config can be declared and provided to our targets.
 
 Consider the following:
 
@@ -115,22 +109,17 @@ require('targets')({
 
 ```
 
-In this example, we've adding some prompts to our weather targets. By doing
-this, we are declaring what configuration our target requires in order to run,
-but we're doing so in way which will allow the system to ask for the needed
-input if it is not provided.
+In this example, we've adding some prompts to our weather targets. By doing this, we are declaring what configuration our target requires in order to run, but we're doing so in way which will allow the system to ask for the needed input if it is not provided.
 
-If we run the above with `mycli weather.sky weather.temp` and no additional
-arguments, Targets will detect that config is missing for these targets and you
-will be prompted.
+If we run the above with `mycli weather.sky weather.temp` and no additional arguments, Targets will detect that config is missing for these targets and you will be prompted.
 
 The output will look something like this.
 
 ```
 mycli weather.sky weather.temp
-? [weather.location] Where would you like to know about? Miami
-[Current Temperature] Mostly Clear
-[weather.temp] 83
+? weather.location →  Where would you like to know about? Miami
+Current Temperature →  Mostly Clear
+weather.temp →  83
 ```
 
 > Notice that even though you added these prompts to both of your targets, you only get prompted once. Each prompt is unique by name.
@@ -139,18 +128,14 @@ If the needed config is provided, the user will not be prompted, just as before.
 
 ```
 mycli weather.sky weather.temp --weather.location Chicago
-[Current Weather] Partly Sunny
-[Current Temperature] 75
+Current Weather →  Partly Sunny
+Current Temperature →  75
 ```
 
 > Targets calls this concept "naive config". It gives the user the ability to
 > use your target without knowing what config is needed because the target
 > itself knows how to ask for it.
 
-All prompts are defined as [inquirer](https://www.npmjs.com/package/inquirer)
-options. Check the inquirer docs to learn the various ways you'll be able to
-prompt for config.
+All prompts are defined as [inquirer](https://www.npmjs.com/package/inquirer) options. Check the inquirer docs to learn the various ways you'll be able to prompt for config.
 
-Config in target goes much deeper than command-line arguments and prompts
-however. In the next section we'll explore some of the ways that targets handles
-config files.
+Config in target goes much deeper than command-line arguments and prompts however. In the next section we'll explore some of the ways that targets handles config files.

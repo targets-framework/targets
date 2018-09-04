@@ -18,9 +18,9 @@ You would then be presented with a multiplexed terminal which looks something li
 
 ```
 ┌───────────────────────┐┌───────────────────────────────────────────────────────┐
-│[docker.run,docker.run]││                                                       │
-│                       ││[docker] Running: docker run --tty busybox:latest      │
-│                       ││[docker] Running: docker run --tty busybox:latest      │
+│docker.run,docker.run  ││                                                       │
+│                       ││docker →  Running: docker run --tty busybox:latest     │
+│                       ││docker →  Running: docker run --tty busybox:latest     │
 └───────────────────────┘│                                                       │
 ┌───────────────────────┐│                                                       │
 │                       │└───────────────────────────────────────────────────────┘

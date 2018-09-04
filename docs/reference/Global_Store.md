@@ -1,0 +1,1 @@
+> So much work and thought has gone into how Targets considers and handles configuration that its config system was lifted out of the framework and now exists as two separate modules: [Answers](https://github.com/machellerogden/answers) and [Sugar Merge](https://github.com/machellerogden/sugarmerge). Configuration with Targets continues to evolve.

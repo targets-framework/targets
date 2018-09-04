@@ -16,7 +16,7 @@ With this file in place, running the greet command from the last section without
 
 ```
 mycli greet
-[Config Example] Hello, Peter!
+Config Example →  Hello, Peter!
 ```
 
 Let's move that rc file so that it resides in your user's home directory instead of in the project directory.
@@ -29,7 +29,7 @@ Run the command again.
 
 ```
 mycli greet
-[Config Example] Hello, Peter!
+Config Example →  Hello, Peter!
 ```
 
 Same effect—it still works. Now, leave the `$HOME/.myclirc` file in your home directory, but add a copy of it back into your project.
@@ -52,7 +52,7 @@ Run the command again.
 
 ```
 mycli greet
-[Config Example] Hello, Jane!
+Config Example →  Hello, Jane!
 ```
 
 The project-level config takes priority.
@@ -91,9 +91,9 @@ To test that it's working, run `mycli logger --logger.foo`. You should see the f
 
 ```
 mycli logger --logger.foo
-[logger] {
-[logger]     "foo": true
-[logger] }
+logger →  {
+logger →      "foo": true
+logger →  }
 ```
 
 Now, create a `./.myclirc` in your project directory which contains the following:
@@ -120,19 +120,19 @@ Run `mycli logger --logger.collection[1].name bar`. You should see this output.
 
 ```
 mycli logger
-[logger] {
-[logger]     "collection": [
-[logger]         {
-[logger]             "name": "foo"
-[logger]         },
-[logger]         {
-[logger]             "name": "bar"
-[logger]         },
-[logger]         {
-[logger]             "name": "foo"
-[logger]         }
-[logger]     ]
-[logger] }
+logger →  {
+logger →      "collection": [
+logger →          {
+logger →              "name": "foo"
+logger →          },
+logger →          {
+logger →              "name": "bar"
+logger →          },
+logger →          {
+logger →              "name": "foo"
+logger →          }
+logger →      ]
+logger →  }
 ```
 
 With targets, you can override and amend to almost any value in the config via command-line arguments no matter how complex the config.
@@ -166,26 +166,26 @@ You should see the following output:
 
 ```
 mycli logger
-[logger] {
-[logger]     "collection": [
-[logger]         {
-[logger]             "people": [
-[logger]                 {
-[logger]                     "name": "Jane",
-[logger]                     "role": "Developer"
-[logger]                 },
-[logger]                 {
-[logger]                     "name": "Peter",
-[logger]                     "role": "Manager"
-[logger]                 },
-[logger]                 {
-[logger]                     "name": "Shana",
-[logger]                     "role": "Director"
-[logger]                 }
-[logger]             ]
-[logger]         }
-[logger]     ]
-[logger] }
+logger →  {
+logger →      "collection": [
+logger →          {
+logger →              "people": [
+logger →                  {
+logger →                      "name": "Jane",
+logger →                      "role": "Developer"
+logger →                  },
+logger →                  {
+logger →                      "name": "Peter",
+logger →                      "role": "Manager"
+logger →                  },
+logger →                  {
+logger →                      "name": "Shana",
+logger →                      "role": "Director"
+logger →                  }
+logger →              ]
+logger →          }
+logger →      ]
+logger →  }
 ```
 
 This `[+]` syntax is a special syntax which allows you to push items onto an array in the existing config.
@@ -202,26 +202,26 @@ You should see the following output:
 
 ```
 mycli logger
-[logger] {
-[logger]     "collection": [
-[logger]         {
-[logger]             "people": [
-[logger]                 {
-[logger]                     "name": "Jane",
-[logger]                     "role": "Developer"
-[logger]                 },
-[logger]                 {
-[logger]                     "name": "Shana",
-[logger]                     "role": "Director"
-[logger]                 },
-[logger]                 {
-[logger]                     "name": "Peter",
-[logger]                     "role": "Manager"
-[logger]                 }
-[logger]             ]
-[logger]         }
-[logger]     ]
-[logger] }
+logger →  {
+logger →      "collection": [
+logger →          {
+logger →              "people": [
+logger →                  {
+logger →                      "name": "Jane",
+logger →                      "role": "Developer"
+logger →                  },
+logger →                  {
+logger →                      "name": "Shana",
+logger →                      "role": "Director"
+logger →                  },
+logger →                  {
+logger →                      "name": "Peter",
+logger →                      "role": "Manager"
+logger →                  }
+logger →              ]
+logger →          }
+logger →      ]
+logger →  }
 ```
 
 These special syntax keys work in your config files as well.
@@ -273,3 +273,4 @@ You should see the same effect as when you did this via command-line options.
 Congrats! You now know almost everything targets provides for configuring your targets.
 
 In the next section, you'll learn how the framework allows explict config bindings which keep your config dry while maintaining proper boundaries on the functional components of your system.
+

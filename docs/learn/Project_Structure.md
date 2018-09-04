@@ -21,15 +21,11 @@ Then, in `./index.js` you just need to include the following to auto register an
 #!/usr/bin/env node
 'use strict';
 
-const targets = require('require-dir')('./targets');
+const Targets = require('targets');
 
-require('targets')({ name: 'mycli', targets });
+Targets.load('./targets/**');
+
+Targets({ name: 'mycli', targets });
 ```
 
 With this structure in place, so long as each file module inside the `./targets` directory exports a function, the filename (minus the extension) will become the target's name.
-
-### Using Loaders
-
-If you are using the `Targets.load(<glob>)` function, you can gain much more flexibility in you organize things. More on this coming soon.
-
-**TODO: add section about `load`**

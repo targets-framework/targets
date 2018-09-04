@@ -1,20 +1,9 @@
 # Motivation
 
-Today's tech platform relies on dozens if not hundreds of different tools and services. AWS alone offers over 140 services. Even when an organization adopts a "Platform-as-a-Service" (PaaS), there are still many other systems which remain integral to the platform which reside outside of the PaaS. There is no singular tech platform in existence—all tech platforms are bespoke by necessity. And, bespoke platforms beget bespoke tooling. And here's where our story begins:
+The "developer platform" at a given tech organization today is more often than not a host of disparate solutions which have been adopted and then bound together by little more than half a dozen third-party CLIs, a few shell scripts and the moniker of "platform".
 
-There is a problem with how we go about authoring developer tooling.
+Even when an organization adopts a "Platform-as-a-Service" (PaaS), there are still many systems which remain integral to the "platform" but which reside outside of the PaaS.
 
-Historically, developers would hack together a few scripts in their free time ...
+Many tech organizations get closer to a what might be considered a true developer platform by authoring bespoke services and tooling which allow developers to operate across the various underlying integrations more seemlessly. But what happens when an organization finds itself with too much in-house tooling? The tooling faces the same problem it sought to remedy—there is nothing to bind it all together.
 
-DevOps teams and Developer Platform Teams on the rise ...
-
-Still scripting one-off solutions ... Even if using Go, Python, Node, new hotness ... too single purpose ...
-
-All of a sudden the tooling, which is supposed to be the glue which binds the platfrom needs it's own glue.
-
-
-
-
-## Abstraction
-
-A
+This is the challenge which Targets strives to address.
