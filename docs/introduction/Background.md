@@ -1,0 +1,9 @@
+# Background
+
+## The Targets Origin Story / A Note From the Author
+
+Make was the original build tool. It was originally designed to make configuring, compiling, testing, debugging and running C code easier. Its history is deep coupled with the C programming language. Over time, Make has become useful for all sort of scripting beyond just working with C. In fact, Make was the backbone for a simple docker scheduling tool I wrote a few years ago called [powertrain](https://github.com/carsdotcom/powertrain). Targets on the other hand has nothing to do with C, or any other language. Targets started as an attempt to take the best ideas from Make around how to compose tasks and how to source config, to improve upon and modernize these basic ideas. It's ended up being so much more.
+
+Targets exists because it's a tool that I've always wanted. It's my passion project. But, I'm hoping it can provide value to others as well. Targets was built for me—but anyone with a passion for DevOps and command-line scripting should be able to find new and creative ways to leverage it.
+
+In Make, a target is a reference to the "target" program which you are intending to "make", but Make also supports the concept of "phony targets" which you can define with arbitrary behavior and which can be composed as tasks. It was Make's phony target capabilities which originally inspired this framework, and it's name.
