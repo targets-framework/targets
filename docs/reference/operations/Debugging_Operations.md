@@ -32,3 +32,15 @@ Use the **log** operation to log the current state of the global store at any gi
 ### Arguments
 
 * `{on|off}` - turn debug mode on or off.
+
+
+## @inspect
+
+### Syntax
+
+`@inspect/{target name}`
+
+### Arguments
+
+* `{target name}` - name of target which you would like to inspect
+
