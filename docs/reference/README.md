@@ -14,3 +14,4 @@ The documentation in this section provided detailed usage instruction for those 
     * [Binding Operations](operations/Binding_Operations.md)
     * [Predicating Operations](operations/Predicating_Operations.md)
     * [Debugging Operations](operations/Debugging_Operations.md)
+* [TTY Mode](TTY_Mode.md)

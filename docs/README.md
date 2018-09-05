@@ -34,3 +34,4 @@
         * [Binding Operations](reference/operations/Binding_Operations.md)
         * [Predicating Operations](reference/operations/Predicating_Operations.md)
         * [Debugging Operations](reference/operations/Debugging_Operations.md)
+    * [TTY Mode](reference/TTY_Mode.md)

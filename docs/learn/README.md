@@ -12,4 +12,3 @@ The tutorials in this chapter will cover everything from basic terminology and s
 * [Loaders](Loaders.md)
 * [Project Structure](Project_Structure.md)
 * [More Examples](More_Examples.md)
-* [TTY Mode](TTY_Mode.md)
