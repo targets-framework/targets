@@ -7,4 +7,5 @@ The documentation in this section provided detailed usage instruction for those 
 * [System Requirements](System_Requirements.md)
 * [Installation](Installation.md)
 * [Operations](operations/README.md)
-    * [Built-In Operations](operations/Built_In_Operations.md)
+    * [Binding Operations](operations/Binding_Operations.md)
+    * [Predicating Operations](operations/Predicating_Operations.md)

@@ -18,3 +18,5 @@ All operations start with an at sign (`@`) followed by the operation's name. Opt
 
 `@{operation name}/{argument}::{argument}[::{...rest}]`
 
+* [Binding Operations](Binding_Operations.md)
+* [Predicating Operations](Predicating_Operations.md)
