@@ -18,7 +18,7 @@ Use the **bind** operation to take a value at a given location from within the g
 ### Example
 
 ```sh
---config.git.refspec HEAD @bind/result.git.rev-parse::config.fs.name fs.write
+--config.git.refspec HEAD git.rev-parse @bind/result.git.rev-parse::config.fs.name fs.write
 ```
 
 ## @bind-to

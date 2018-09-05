@@ -20,3 +20,4 @@ All operations start with an at sign (`@`) followed by the operation's name. Opt
 
 * [Binding Operations](Binding_Operations.md)
 * [Predicating Operations](Predicating_Operations.md)
+* [Debugging Operations](Debugging_Operations.md)

@@ -6,6 +6,11 @@ The documentation in this section provided detailed usage instruction for those 
 
 * [System Requirements](System_Requirements.md)
 * [Installation](Installation.md)
+* [Configuration](Configuration.md)
+* [Settings](Settings.md)
+* [Global Store](Global_Store.md)
+* [Scheduler](Scheduler.md)
 * [Operations](operations/README.md)
     * [Binding Operations](operations/Binding_Operations.md)
     * [Predicating Operations](operations/Predicating_Operations.md)
+    * [Debugging Operations](operations/Debugging_Operations.md)
