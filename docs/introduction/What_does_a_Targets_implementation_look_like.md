@@ -19,7 +19,7 @@ spec:
   - docker.build
   - docker.tag
   - deploy.confirm
-  - '@proceed-when/deploy.confirm.ready'
+  - '@proceed-when/result.deploy.confirm.ready'
   - docker.push
   - '@bind-to/config.profile-a::k8s.apply,@bind-to/config.profile-b::k8s.apply'
   - '@bind-to/config.profile-a::k8s.verify,@bind-to/config.profile-b::k8s.verify'
