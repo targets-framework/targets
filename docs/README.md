@@ -22,7 +22,6 @@
     * [Loaders](learn/Loaders.md)
     * [Project Structure](learn/Project_Structure.md)
     * [More Examples](learn/More_Examples.md)
-    * [TTY Mode](learn/TTY_Mode.md)
 * [Reference](reference/README.md)
     * [System Requirements](reference/System_Requirements.md)
     * [Installation](reference/Installation.md)
