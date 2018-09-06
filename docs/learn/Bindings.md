@@ -61,7 +61,7 @@ Greet →  Hello, Mac Heller-Ogden!
 
 Here you'll see that the result from one target was "bound" to the config of another target.
 
-> The right-side of the binding can use the special array notations you learned about in the [previous section]("learn/Config_2/.md"): `[+]`, `[-]`, `[<int>,<int>]`.
+> The right-side of the binding can use the special array notations you learned about in the [previous section](learn/Config_2/.md): `[+]`, `[-]`, `[<int>,<int>]`.
 
 Aside from binding results, targets also allows you to bind config from one namespace to another. For example...
 

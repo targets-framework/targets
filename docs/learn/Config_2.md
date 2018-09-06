@@ -6,8 +6,10 @@ Create a `.myclirc` file in the project's root directory which contains the foll
 
 ```
 {
-    "greet": {
-        "name": "Peter"
+    "config": {
+        "greet": {
+            "name": "Peter"
+        }
     }
 }
 ```
@@ -42,8 +44,10 @@ Open the copy in your project directory and change "Peter" to "Jane".
 
 ```
 {
-    "greet": {
-        "name": "Jane"
+    "config": {
+        "greet": {
+            "name": "Jane"
+        }
     }
 }
 ```
@@ -75,64 +79,51 @@ The logic which handles this config cascade orginally came from the [rc](https:/
 
 To understand how config gets merged, let's do another quick exercise.
 
-Let's start by adding a new target called `logger` to our CLI. This target will simply print out the options which it is provided with.
+Let's use the `@log` operation to take a peek into the global store.
 
-```js
-#!/usr/bin/env node
-'use strict';
-
-const logger = (options) => options;
-
-require('targets')({ targets: { logger } });
-```
-
-To test that it's working, run `mycli logger --logger.foo`. You should see the following output.
-
+Here's an example of how to use `@log`:
 
 ```
-mycli logger --logger.foo
-logger →  {
-logger →      "foo": true
-logger →  }
+mycli @log/config --foo
+@log →  {
+@log →      "foo": true
+@log →  }
 ```
 
-Now, create a `./.myclirc` in your project directory which contains the following:
+Now that we have a way to log the config, let's create a `./.myclirc` in your project directory which contains the following:
 
 ```js
 {
-    "logger": {
-        "collection": [
-            {
-                "name": "foo"
-            },
-            {
-                "name": "foo"
-            },
-            {
-                "name": "foo"
-            }
-        ]
-    }
+    "collection": [
+        {
+            "name": "foo"
+        },
+        {
+            "name": "foo"
+        },
+        {
+            "name": "foo"
+        }
+    ]
 }
 ```
 
-Run `mycli logger --logger.collection[1].name bar`. You should see this output.
+Run `mycli --collection[1].name bar @log/config`. You should see this output.
 
 ```
-mycli logger
-logger →  {
-logger →      "collection": [
-logger →          {
-logger →              "name": "foo"
-logger →          },
-logger →          {
-logger →              "name": "bar"
-logger →          },
-logger →          {
-logger →              "name": "foo"
-logger →          }
-logger →      ]
-logger →  }
+@log →  {
+@log →      "collection": [
+@log →          {
+@log →              "name": "foo"
+@log →          },
+@log →          {
+@log →              "name": "bar"
+@log →          },
+@log →          {
+@log →              "name": "foo"
+@log →          }
+@log →      ]
+@log →  }
 ```
 
 With targets, you can override and amend to almost any value in the config via command-line arguments no matter how complex the config.
@@ -141,51 +132,48 @@ Let's consider a more complex config example. Modify the `./.myclirc` in your pr
 
 ```js
 {
-    "logger": {
-        "collection": [
-            {
-                "people": [
-                    {
-                        "name": "Jane",
-                        "role": "Developer"
-                    },
-                    {
-                        "name": "Peter",
-                        "role": "Manager"
-                    }
-                ]
-            }
-        ]
-    }
+    "collection": [
+        {
+            "people": [
+                {
+                    "name": "Jane",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Peter",
+                    "role": "Manager"
+                }
+            ]
+        }
+    ]
 }
 ```
 
-Run `mycli logger --logger.collection[0].people[+].name Shana --logger.collection[0].people[+].role Director`.
+Run `mycli @log/config --collection[0].people[+].name Shana --collection[0].people[+].role Director`.
 
 You should see the following output:
 
 ```
-mycli logger
-logger →  {
-logger →      "collection": [
-logger →          {
-logger →              "people": [
-logger →                  {
-logger →                      "name": "Jane",
-logger →                      "role": "Developer"
-logger →                  },
-logger →                  {
-logger →                      "name": "Peter",
-logger →                      "role": "Manager"
-logger →                  },
-logger →                  {
-logger →                      "name": "Shana",
-logger →                      "role": "Director"
-logger →                  }
-logger →              ]
-logger →          }
-logger →      ]
-logger →  }
+@log →  {
+@log →      "collection": [
+@log →          {
+@log →              "people": [
+@log →                  {
+@log →                      "name": "Jane",
+@log →                      "role": "Developer"
+@log →                  },
+@log →                  {
+@log →                      "name": "Peter",
+@log →                      "role": "Manager"
+@log →                  },
+@log →                  {
+@log →                      "name": "Shana",
+@log →                      "role": "Director"
+@log →                  }
+@log →              ]
+@log →          }
+@log →      ]
+@log →  }
 ```
 
 This `[+]` syntax is a special syntax which allows you to push items onto an array in the existing config.
@@ -196,32 +184,31 @@ There are two other special syntaxes you should become familiar with. Ending an 
 
 Here's another example, this time using the splice syntax:
 
-Run `mycli logger --logger.collection[0].people[1,0].name Shana --logger.collection[0].people[1,0].role Directory`.
+Run `mycli @log/config --collection[0].people[1,0].name Shana --collection[0].people[1,0].role Directory`.
 
 You should see the following output:
 
 ```
-mycli logger
-logger →  {
-logger →      "collection": [
-logger →          {
-logger →              "people": [
-logger →                  {
-logger →                      "name": "Jane",
-logger →                      "role": "Developer"
-logger →                  },
-logger →                  {
-logger →                      "name": "Shana",
-logger →                      "role": "Director"
-logger →                  },
-logger →                  {
-logger →                      "name": "Peter",
-logger →                      "role": "Manager"
-logger →                  }
-logger →              ]
-logger →          }
-logger →      ]
-logger →  }
+@log →  {
+@log →      "collection": [
+@log →          {
+@log →              "people": [
+@log →                  {
+@log →                      "name": "Jane",
+@log →                      "role": "Developer"
+@log →                  },
+@log →                  {
+@log →                      "name": "Shana",
+@log →                      "role": "Director"
+@log →                  },
+@log →                  {
+@log →                      "name": "Peter",
+@log →                      "role": "Manager"
+@log →                  }
+@log →              ]
+@log →          }
+@log →      ]
+@log →  }
 ```
 
 These special syntax keys work in your config files as well.
@@ -230,39 +217,35 @@ Put the same config as we used above into `$HOME/.myclirc`. Here it is again for
 
 ```
 {
-    "logger": {
-        "collection": [
-            {
-                "people": [
-                    {
-                        "name": "Jane",
-                        "role": "Developer"
-                    },
-                    {
-                        "name": "Peter",
-                        "role": "Manager"
-                    }
-                ]
-            }
-        ]
-    }
+    "collection": [
+        {
+            "people": [
+                {
+                    "name": "Jane",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Peter",
+                    "role": "Manager"
+                }
+            ]
+        }
+    ]
 }
 ```
 
-Now, open the `./myclirc` file in your **project** directory and populate it with the following:
+Now, open the `./.myclirc` file in your **project** directory and populate it with the following:
 
 ```
 {
-    "logger": {
-        "collection": [
-            {
-                "people[1,0]": {
-                    "name": "Shana",
-                    "role": "Developer"
-                }
+    "collection": [
+        {
+            "people[1,0]": {
+                "name": "Shana",
+                "role": "Developer"
             }
-        ]
-    }
+        }
+    ]
 }
 ```
 
