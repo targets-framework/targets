@@ -66,7 +66,7 @@ async function Targets(options = {}) {
 
     const load = isString(givenLoad)
         ? [ givenLoad, ...configLoad ]
-        : [ ...(givenLoad || []), ...configLoad ];
+        : [ ...givenLoad, ...configLoad ];
 
     const targets = (load.length)
         ? { ...givenTargets, ...targetLoader(load, true) }
