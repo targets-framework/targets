@@ -3,6 +3,7 @@
   "version": "1.4.3",
   "description": "Node.js CLI bootstrapper powered by minimist and inquirer",
   "main": "index.js",
+  "bin": "./bin/index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "test": "./node_modules/.bin/mocha \"test/**/*.spec.js\"",
@@ -28,6 +29,7 @@
     "byline": "^5.0.0",
     "callsites": "^2.0.0",
     "chalk": "^2.4.1",
+    "ci-info": "^1.4.0",
     "figures": "^2.0.0",
     "flat": "^4.1.0",
     "globby": "^8.0.1",
@@ -38,6 +40,7 @@
     "stream-line-wrapper": "0.1.1",
     "stream-to-promise": "^2.2.0",
     "sugarmerge": "0.1.1",
+    "untildify": "^3.0.3",
     "vm2": "^3.6.2"
   },
   "devDependencies": {

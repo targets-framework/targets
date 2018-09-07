@@ -25,7 +25,7 @@
 'use strict';
 
 module.exports = Targets;
-Targets.load = require('./lib/load');
+const targetLoader = Targets.load = require('./lib/load');
 Targets.Spawn = require('./lib/Spawn');
 
 const Answers = require('answers');
@@ -36,12 +36,14 @@ const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
+const { isString } = require('./lib/util');
 
 async function Targets(options = {}) {
 
     const {
         name = getName(),
-        targets = {},
+        targets:givenTargets = {},
+        load:givenLoad = [],
 
         // here be dragons...
         operations:customOperations = {},
@@ -52,15 +54,28 @@ async function Targets(options = {}) {
 
     process.title = name;
 
+    const answers = Answers({ name, prefix: 'config' });
+
+    const prePromptState = await answers.get();
+
+    Store.Set()(prePromptState);
+
+    const configLoad = isString(prePromptState.load)
+        ? [ prePromptState.load ]
+        : prePromptState.load || [];
+
+    const load = isString(givenLoad)
+        ? [ givenLoad, ...configLoad ]
+        : [ ...(givenLoad || []), ...configLoad ];
+
+    const targets = (load.length)
+        ? { ...givenTargets, ...targetLoader(load, true) }
+        : givenTargets;
+
     const args = await InitialPrompt({ targets, argv });
     const operations = { ...builtinOps, ...customOperations };
     const loaders = { ...builtinLoaders, ...customLoaders };
     const queue = Queue({ targets, operations, loaders, args });
-
-    const answers = Answers({ name, prefix: 'config' });
-
-    const prePromptState = await answers.get();
-    Store.Set()(prePromptState);
 
     const prompts = Prompts(queue);
     const initialState = await answers.get(prompts);
