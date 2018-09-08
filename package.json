@@ -22,7 +22,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "answers": "^2.1.0",
+    "answers": "^2.1.1",
     "axios": "^0.18.0",
     "blessed": "^0.1.81",
     "blessed-xterm": "^1.1.19",
