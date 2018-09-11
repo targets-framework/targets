@@ -1,7 +1,7 @@
 {
   "name": "targets",
   "version": "1.6.0",
-  "description": "Node.js CLI bootstrapper powered by minimist and inquirer",
+  "description": "a task orchestration and composition framework",
   "main": "index.js",
   "bin": "./bin/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "coverage": "rm -rf ./coverage && ./node_modules/.bin/nyc --reporter=html --reporter=lcov npm test",
     "coverage:check": "npm run coverage && ./node_modules/.bin/nyc check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
   },
-  "homepage": "https://targets-framework.github.io",
+  "homepage": "https://targets.gitbook.io/",
   "repository": {
     "type": "git",
     "url": "https://github.com/targets-framework/targets.git"
