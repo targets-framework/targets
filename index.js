@@ -24,7 +24,10 @@
 
 'use strict';
 
+if (parseInt(process.versions.node.split('.')[0]) < 10) throw new Error('targets requires Node.js version 10 or newer.');
+
 module.exports = Targets;
+
 const targetLoader = Targets.load = require('./lib/load');
 Targets.Spawn = require('./lib/Spawn');
 
