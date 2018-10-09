@@ -31,6 +31,8 @@ module.exports = Targets;
 const targetLoader = Targets.load = require('./lib/load');
 Targets.Spawn = require('./lib/Spawn');
 
+const path = require('path');
+const callsites = require('callsites');
 const Answers = require('answers');
 const Queue = require('./lib/Queue');
 const InitialPrompt = require('./lib/InitialPrompt');
@@ -42,13 +44,14 @@ const Store = require('./lib/Store');
 const { isString } = require('./lib/util');
 
 async function Targets(options = {}) {
+    const calledFrom = path.dirname(callsites()[1].getFileName());
 
     const {
         name = getName(),
         targets:givenTargets = {},
-        load:givenLoad = [],
+        source:givenSource = [],
 
-        // here be dragons...
+        // here be dragons... (untested)
         operations:customOperations = {},
         loaders:customLoaders = {},
 
@@ -63,16 +66,16 @@ async function Targets(options = {}) {
 
     Store.Set()(prePromptState);
 
-    const configLoad = isString(prePromptState.load)
-        ? [ prePromptState.load ]
-        : prePromptState.load || [];
+    const configSource = isString(prePromptState.source)
+        ? [ prePromptState.source ]
+        : prePromptState.source || [];
 
-    const load = isString(givenLoad)
-        ? [ givenLoad, ...configLoad ]
-        : [ ...givenLoad, ...configLoad ];
+    const source = isString(givenSource)
+        ? [ givenSource, ...configSource ]
+        : [ ...givenSource, ...configSource ];
 
-    const targets = (load.length)
-        ? { ...givenTargets, ...targetLoader(load, true) }
+    const targets = (source.length)
+        ? { ...givenTargets, ...targetLoader({ patterns: source, cwd: calledFrom }) }
         : givenTargets;
 
     const args = await InitialPrompt({ targets, argv });
