@@ -16,23 +16,22 @@ describe('Targets', () => {
 
     function setup({ answers = {} }) {
 
-        const answersStub = { get: () => {} };
-        sandbox.stub(answersStub, 'get').resolves(answers);
+        const AnswersSpy = sandbox.fake.resolves(answers);
 
-        const Targets = proxyquire('..', { answers: () => answersStub });
+        const Targets = proxyquire('..', { Answers: AnswersSpy });
 
-        return { Targets, answersStub };
+        return { Targets, AnswersSpy };
     }
 
     it('should prompt user with choices for which registered targets to invoke', () => {
 
         const argv = [ 'foo' ];
         const answers = { _: argv };
-        const { Targets, answersStub } = setup({ answers });
+        const { Targets, AnswersSpy } = setup({ answers });
         const foo = () => 'bar';
 
         return Targets({ argv, targets: { foo } })
-            .then(() => expect(answersStub.get).to.have.been.called);
+            .then(() => expect(AnswersSpy).to.have.been.called);
     });
 
     describe('chosen targets', () => {

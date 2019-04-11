@@ -60,9 +60,14 @@ async function Targets(options = {}) {
 
     process.title = name;
 
-    const answers = Answers({ name, prefix: 'config' });
-
-    const prePromptState = await answers.get();
+    const prefixer = config => {
+        const result = Object.entries(config).reduce((acc, [ k, v ]) => {
+            acc.config[k] = v;
+            return acc;
+        }, { config: {} });
+        return result;
+    };
+    const prePromptState = await Answers({ name, loaders: [ prefixer ] });
 
     Store.Set()(prePromptState);
 
@@ -84,7 +89,7 @@ async function Targets(options = {}) {
     const queue = Queue({ targets, operations, loaders, args });
 
     const prompts = Prompts(queue);
-    const initialState = await answers.get(prompts);
+    const initialState = await Answers({ loaders: [ prefixer ], prompts });
 
     Store.Set()(initialState);
     Store.setting.set(Store.settingsFromArgv(initialState['--']));
