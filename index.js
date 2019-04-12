@@ -24,7 +24,7 @@
 
 'use strict';
 
-if (parseInt(process.versions.node.split('.')[0]) < 10) throw new Error('targets requires Node.js version 10 or newer.');
+if (process.versions.node.split('.')[0] < 10) throw new Error('targets requires Node.js version 10 or newer.');
 
 module.exports = Targets;
 
@@ -41,6 +41,34 @@ const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
+const globby = require('globby');
+
+function expandPath(patterns, dir) {
+    if (!Array.isArray(patterns)) patterns = [ patterns ];
+    return patterns.reduce((acc, p) => {
+        if (/^~/.test(p)) {
+            acc = [ ...acc, ...globby.sync(path.join('.', p.slice(1)), { absolute: true, onlyDirectories: true, cwd: process.env.HOME }) ];
+        } else {
+            acc = [ ...acc, ...globby.sync(p, { absolute: true, onlyDirectories: true, cwd: dir }) ];
+        }
+        return acc;
+    }, []);
+}
+
+function filePathExpander(config, filename) {
+    const filePath = k => /{{file:([^}]+)}}/.exec(k)[1];
+    return Array.isArray(config)
+        ? config.reduce((acc, v, k) => {
+            const fp = filePath(v);
+            if (fp) acc[k] = expandPath(fp, path.dirname(filename));
+            return acc;
+        }, [])
+        : Object.entries(config).reduce((acc, [ k, v ]) => {
+            const fp = filePath(v);
+            if (fp) acc[k] = expandPath(fp, path.dirname(filename));
+            return acc;
+        }, {});
+}
 
 async function Targets(options = {}) {
     const calledFrom = path.dirname(callsites()[1].getFileName());
@@ -59,11 +87,7 @@ async function Targets(options = {}) {
 
     process.title = name;
 
-    // Commenting out config sourced targets logic until we can reliably source relative paths...
-    /*
-    const prePromptState = await Answers({ name, loaders: [ prefixer ] });
-
-    Store.Set()(prePromptState);
+    const prePromptState = await Answers({ name, loaders: [ filePathExpander ] });
 
     const configSource = isString(prePromptState.source)
       ? [ prePromptState.source ]
@@ -71,11 +95,7 @@ async function Targets(options = {}) {
 
     const source = isString(givenSource)
       ? [ givenSource, ...configSource ]
-        : [ ...givenSource, ...configSource ];
-    */
-
-    // TODO: fix above then remove next line
-    const source = givenSource;
+      : [ ...givenSource, ...configSource ];
 
     const targets = (source.length)
         ? { ...givenTargets, ...targetLoader({ patterns: source, cwd: calledFrom }) }
@@ -95,3 +115,5 @@ async function Targets(options = {}) {
     /* eslint-disable-next-line */
     for await (const result of Scheduler(queue)) {}
 }
+
+filePathExpander({ "foo": "{{file:~/targets}}" }, `${process.cwd()}/examples/.myclirc`)
