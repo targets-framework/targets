@@ -41,13 +41,12 @@ const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
-const { isString } = require('./lib/util');
 
 async function Targets(options = {}) {
     const calledFrom = path.dirname(callsites()[1].getFileName());
 
     const {
-        name = getName(),
+        name = 'targets',
         targets:givenTargets = {},
         source:givenSource = [],
 
@@ -60,24 +59,23 @@ async function Targets(options = {}) {
 
     process.title = name;
 
-    const prefixer = config => {
-        const result = Object.entries(config).reduce((acc, [ k, v ]) => {
-            acc.config[k] = v;
-            return acc;
-        }, { config: {} });
-        return result;
-    };
+    // Commenting out config sourced targets logic until we can reliably source relative paths...
+    /*
     const prePromptState = await Answers({ name, loaders: [ prefixer ] });
 
     Store.Set()(prePromptState);
 
     const configSource = isString(prePromptState.source)
-        ? [ prePromptState.source ]
-        : prePromptState.source || [];
+      ? [ prePromptState.source ]
+      : prePromptState.source || [];
 
     const source = isString(givenSource)
-        ? [ givenSource, ...configSource ]
+      ? [ givenSource, ...configSource ]
         : [ ...givenSource, ...configSource ];
+    */
+
+    // TODO: fix above then remove next line
+    const source = givenSource;
 
     const targets = (source.length)
         ? { ...givenTargets, ...targetLoader({ patterns: source, cwd: calledFrom }) }
@@ -89,16 +87,11 @@ async function Targets(options = {}) {
     const queue = Queue({ targets, operations, loaders, args });
 
     const prompts = Prompts(queue);
-    const initialState = await Answers({ loaders: [ prefixer ], prompts });
+    const initialState = await Answers({ name, prompts });
 
     Store.Set()(initialState);
     Store.setting.set(Store.settingsFromArgv(initialState['--']));
 
     /* eslint-disable-next-line */
     for await (const result of Scheduler(queue)) {}
-}
-
-function getName() {
-    const { name = 'targets' } = require('read-pkg-up').sync({ cwd: require('path').dirname(require('parent-module')()) }).pkg || {};
-    return name;
 }
