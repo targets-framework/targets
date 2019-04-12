@@ -42,11 +42,14 @@ const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
 const globby = require('globby');
+const { isString } = require('./lib/util');
 
 function expandPath(patterns, dir) {
     if (!Array.isArray(patterns)) patterns = [ patterns ];
     return patterns.reduce((acc, p) => {
-        if (/^~/.test(p)) {
+        if (/^\//.test(p)) {
+            acc = [ ...acc, ...globby.sync(path.join('.', p), { absolute: true, onlyDirectories: true, cwd: '/' }) ];
+        } else if (/^~/.test(p)) {
             acc = [ ...acc, ...globby.sync(path.join('.', p.slice(1)), { absolute: true, onlyDirectories: true, cwd: process.env.HOME }) ];
         } else {
             acc = [ ...acc, ...globby.sync(p, { absolute: true, onlyDirectories: true, cwd: dir }) ];
@@ -55,19 +58,9 @@ function expandPath(patterns, dir) {
     }, []);
 }
 
-function filePathExpander(config, filename) {
-    const filePath = k => /{{file:([^}]+)}}/.exec(k)[1];
-    return Array.isArray(config)
-        ? config.reduce((acc, v, k) => {
-            const fp = filePath(v);
-            if (fp) acc[k] = expandPath(fp, path.dirname(filename));
-            return acc;
-        }, [])
-        : Object.entries(config).reduce((acc, [ k, v ]) => {
-            const fp = filePath(v);
-            if (fp) acc[k] = expandPath(fp, path.dirname(filename));
-            return acc;
-        }, {});
+function sourceExpander(config, filename) {
+    if (config.source == null) return config;
+    return { ...config, source: expandPath(config.source) };
 }
 
 async function Targets(options = {}) {
@@ -87,7 +80,7 @@ async function Targets(options = {}) {
 
     process.title = name;
 
-    const prePromptState = await Answers({ name, loaders: [ filePathExpander ] });
+    const prePromptState = await Answers({ name, loaders: [ sourceExpander ] });
 
     const configSource = isString(prePromptState.source)
       ? [ prePromptState.source ]
@@ -115,5 +108,3 @@ async function Targets(options = {}) {
     /* eslint-disable-next-line */
     for await (const result of Scheduler(queue)) {}
 }
-
-filePathExpander({ "foo": "{{file:~/targets}}" }, `${process.cwd()}/examples/.myclirc`)
