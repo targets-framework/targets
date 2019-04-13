@@ -28,12 +28,12 @@ if (process.versions.node.split('.')[0] < 10) throw new Error('targets requires 
 
 module.exports = Targets;
 
-const targetLoader = Targets.load = require('./lib/load');
+const { load, expandPatterns } = require('./lib/load');
+Targets.load = load;
 Targets.Spawn = require('./lib/Spawn');
 
 const path = require('path');
-const callsites = require('callsites');
-const Answers = require('answers');
+const DefaultAnswers = require('answers');
 const Queue = require('./lib/Queue');
 const InitialPrompt = require('./lib/InitialPrompt');
 const { Scheduler } = require('./lib/Scheduler');
@@ -41,30 +41,14 @@ const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
-const globby = require('globby');
 const { isString } = require('./lib/util');
-
-function expandPath(patterns, dir) {
-    if (!Array.isArray(patterns)) patterns = [ patterns ];
-    return patterns.reduce((acc, p) => {
-        if (/^\//.test(p)) {
-            acc = [ ...acc, ...globby.sync(path.join('.', p), { absolute: true, onlyDirectories: true, cwd: '/' }) ];
-        } else if (/^~/.test(p)) {
-            acc = [ ...acc, ...globby.sync(path.join('.', p.slice(1)), { absolute: true, onlyDirectories: true, cwd: process.env.HOME }) ];
-        } else {
-            acc = [ ...acc, ...globby.sync(p, { absolute: true, onlyDirectories: true, cwd: dir }) ];
-        }
-        return acc;
-    }, []);
-}
 
 function sourceExpander(config, filename) {
     if (config.source == null) return config;
-    return { ...config, source: expandPath(config.source) };
+    return { ...config, source: expandPatterns(config.source, path.dirname(filename)) };
 }
 
 async function Targets(options = {}) {
-    const calledFrom = path.dirname(callsites()[1].getFileName());
 
     const {
         name = 'targets',
@@ -74,6 +58,8 @@ async function Targets(options = {}) {
         // here be dragons... (untested)
         operations:customOperations = {},
         loaders:customLoaders = {},
+        // for testing we make Answers an option
+        Answers = DefaultAnswers,
 
         argv = process.argv.slice(2)
     } = options;
@@ -91,7 +77,7 @@ async function Targets(options = {}) {
       : [ ...givenSource, ...configSource ];
 
     const targets = (source.length)
-        ? { ...givenTargets, ...targetLoader({ patterns: source, cwd: calledFrom }) }
+        ? { ...givenTargets, ...load({ patterns: source }) }
         : givenTargets;
 
     const args = await InitialPrompt({ targets, argv });

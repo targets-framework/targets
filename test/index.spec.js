@@ -6,7 +6,7 @@ const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
-const proxyquire = require('proxyquire');
+const Targets = require('..');
 
 describe('Targets', () => {
     let sandbox;
@@ -15,23 +15,18 @@ describe('Targets', () => {
     afterEach(() => sandbox.restore());
 
     function setup({ answers = {} }) {
-
-        const AnswersSpy = sandbox.fake.resolves(answers);
-
-        const Targets = proxyquire('..', { Answers: AnswersSpy });
-
-        return { Targets, AnswersSpy };
+        return { Answers: sandbox.fake.resolves(answers) };
     }
 
     it('should prompt user with choices for which registered targets to invoke', () => {
 
         const argv = [ 'foo' ];
         const answers = { _: argv };
-        const { Targets, AnswersSpy } = setup({ answers });
+        const { Answers } = setup({ answers });
         const foo = () => 'bar';
 
-        return Targets({ argv, targets: { foo } })
-            .then(() => expect(AnswersSpy).to.have.been.called);
+        return Targets({ argv, targets: { foo }, Answers })
+            .then(() => expect(Answers).to.have.been.called);
     });
 
     describe('chosen targets', () => {
@@ -41,7 +36,7 @@ describe('Targets', () => {
             const argv = [ 'foo', 'bar' ];
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns('foo');
             foo.label = 'Foo';
@@ -49,7 +44,7 @@ describe('Targets', () => {
             const bar = sandbox.stub().returns('bar');
             bar.label = 'Bar';
 
-            return Targets({ argv, targets: { foo, bar } }).then(() => {
+            return Targets({ argv, targets: { foo, bar }, Answers }).then(() => {
                 expect(foo).to.have.been.called;
                 expect(bar).to.have.been.called;
             });
@@ -75,7 +70,7 @@ describe('Targets', () => {
                 }
             };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns('foo');
             foo.label = 'Foo';
@@ -83,7 +78,7 @@ describe('Targets', () => {
             const bar = sandbox.stub().returns('bar');
             bar.label = 'Bar';
 
-            return Targets({ argv, targets: { foo, bar } }).then(() => {
+            return Targets({ argv, targets: { foo, bar }, Answers }).then(() => {
                 expect(foo).to.have.been.calledWithMatch(fooOptions);
                 expect(bar).to.have.been.calledWithMatch(barOptions);
             });
@@ -94,13 +89,13 @@ describe('Targets', () => {
             const argv = [ 'foo' ];
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().resolves('bar');
 
             sandbox.spy(console, 'log');
 
-            return Targets({ argv, targets: { foo } })
+            return Targets({ argv, targets: { foo }, Answers })
                 .then(() => expect(console.log).to.have.been.calledWith(sinon.match(/foo/), sinon.match.any));
         });
 
@@ -109,9 +104,9 @@ describe('Targets', () => {
             const argv = [ 'foo' ];
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
-            return expect(Targets({ argv, targets: {} })).to.be.rejectedWith(Error, 'invalid target in command');
+            return expect(Targets({ argv, targets: {}, Answers })).to.be.rejectedWith(Error, 'invalid target in command');
         });
     });
 
@@ -131,12 +126,12 @@ describe('Targets', () => {
                 }
             };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns(fooResult);
             const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
 
-            return Targets({ argv, targets: { foo, bar } })
+            return Targets({ argv, targets: { foo, bar }, Answers })
                 .then(() => expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' }));
         });
 
@@ -155,11 +150,11 @@ describe('Targets', () => {
                 }
             };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
 
-            return Targets({ argv, targets: { bar } })
+            return Targets({ argv, targets: { bar }, Answers })
                 .then(() => expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' }));
         });
 
@@ -179,12 +174,12 @@ describe('Targets', () => {
                     }
                 };
 
-                const { Targets } = setup({ answers });
+                const { Answers } = setup({ answers });
 
                 const foo = sandbox.stub().returns(fooResult);
                 const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
 
-                return Targets({ argv, targets: { foo, bar } })
+                return Targets({ argv, targets: { foo, bar }, Answers })
                     .then(() => expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' }));
             });
 
@@ -203,11 +198,11 @@ describe('Targets', () => {
                     }
                 };
 
-                const { Targets } = setup({ answers });
+                const { Answers } = setup({ answers });
 
                 const bar = sandbox.spy(({ barProp = 'bar' }) => barProp);
 
-                return Targets({ argv, targets: { bar } })
+                return Targets({ argv, targets: { bar }, Answers })
                     .then(() => expect(bar).to.have.been.calledWithMatch({ barProp: 'fooValue' }));
             });
         });
@@ -224,12 +219,12 @@ describe('Targets', () => {
 
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns(fooResult);
             const bar = sandbox.spy(() => 'this should happen');
 
-            return Targets({ argv, targets: { foo, bar } })
+            return Targets({ argv, targets: { foo, bar }, Answers })
                 .then(() => expect(bar).to.have.been.called);
         });
 
@@ -241,12 +236,12 @@ describe('Targets', () => {
 
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns(fooResult);
             const bar = sandbox.spy(() => 'this should not happen');
 
-            return Targets({ argv, targets: { foo, bar } })
+            return Targets({ argv, targets: { foo, bar }, Answers })
                 .then(() => expect(bar).not.to.have.been.called);
         });
 
@@ -262,12 +257,12 @@ describe('Targets', () => {
 
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns(fooResult);
             const bar = sandbox.spy(() => 'this should happen');
 
-            return Targets({ argv, targets: { foo, bar } })
+            return Targets({ argv, targets: { foo, bar }, Answers })
                 .then(() => expect(bar).not.to.have.been.called);
         });
 
@@ -279,12 +274,12 @@ describe('Targets', () => {
 
             const answers = { _: argv };
 
-            const { Targets } = setup({ answers });
+            const { Answers } = setup({ answers });
 
             const foo = sandbox.stub().returns(fooResult);
             const bar = sandbox.spy(() => 'this should not happen');
 
-            return Targets({ argv, targets: { foo, bar } })
+            return Targets({ argv, targets: { foo, bar }, Answers })
                 .then(() => expect(bar).to.have.been.called);
         });
 
