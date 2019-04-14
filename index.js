@@ -42,6 +42,7 @@ const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
 const { isString } = require('./lib/util');
+const callsites = require('callsites');
 
 function sourceExpander(config, filename) {
     if (config.source == null) return config;
@@ -49,6 +50,7 @@ function sourceExpander(config, filename) {
 }
 
 async function Targets(options = {}) {
+    const calledFrom = callsites()[1].getFileName();
 
     const {
         name = 'targets',
@@ -77,7 +79,7 @@ async function Targets(options = {}) {
       : [ ...givenSource, ...configSource ];
 
     const targets = (source.length)
-        ? { ...givenTargets, ...load({ patterns: source }) }
+        ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
         : givenTargets;
 
     const args = await InitialPrompt({ targets, argv });
@@ -88,7 +90,7 @@ async function Targets(options = {}) {
     const prompts = Prompts(queue);
     const initialState = await Answers({ name, prompts });
 
-    Store.Set()(initialState);
+    Store.set(initialState);
     Store.setting.set(Store.settingsFromArgv(initialState['--']));
 
     /* eslint-disable-next-line */
