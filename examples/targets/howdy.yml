@@ -9,11 +9,11 @@ spec:
   - result.name.source == 'github'
   spec:
     - github.user
-    - '@result.github.user.name::config.greet.name'
+    - '@bind/result.github.user.name::config.greet.name'
 - kind: composition
   predicates:
   - result.name.source == 'system'
   spec:
     - system.name
-    - '@result.system.name::config.greet.name'
+    - '@bind/result.system.name::config.greet.name'
 - greet
