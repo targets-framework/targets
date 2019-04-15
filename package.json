@@ -30,6 +30,7 @@
     "callsites": "^3.1.0",
     "chalk": "^2.4.1",
     "ci-info": "^1.4.0",
+    "edn-to-js": "0.0.4",
     "figures": "^2.0.0",
     "flat": "^4.1.0",
     "globby": "^8.0.1",
