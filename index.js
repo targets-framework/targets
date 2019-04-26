@@ -28,12 +28,11 @@ if (process.versions.node.split('.')[0] < 10) throw new Error('targets requires 
 
 module.exports = Targets;
 
-const { load, expandPatterns } = require('./lib/load');
+const { load, sourceExpander } = require('./lib/load');
 Targets.load = load;
 Targets.Spawn = require('./lib/Spawn');
 
 const path = require('path');
-const DefaultAnswers = require('answers');
 const Queue = require('./lib/Queue');
 const InitialPrompt = require('./lib/InitialPrompt');
 const { Scheduler } = require('./lib/Scheduler');
@@ -41,42 +40,39 @@ const Prompts = require('./lib/Prompts');
 const builtinOps = require('./lib/operations');
 const builtinLoaders = require('./lib/loaders');
 const Store = require('./lib/Store');
-const { isString } = require('./lib/util');
 const callsites = require('callsites');
+const DefaultAnswers = require('answers');
 
-function sourceExpander(config, filename) {
-    if (config.source == null) return config;
-    return { ...config, source: expandPatterns(config.source, path.dirname(filename)) };
-}
+const {
+    state:stateSchema,
+    options:optionsSchema
+} = require('./lib/schema');
 
 async function Targets(options = {}) {
     const calledFrom = callsites()[1].getFileName();
 
     const {
-        name = 'targets',
-        targets:givenTargets = {},
-        source:givenSource = [],
+        name,
+        argv,
+
+        givenTargets,
+        givenSource,
 
         // here be dragons... (untested)
-        operations:customOperations = {},
-        loaders:customLoaders = {},
-        // for testing we make Answers an option
-        Answers = DefaultAnswers,
+        customOperations,
+        customLoaders,
 
-        argv = process.argv.slice(2)
-    } = options;
+        // dep injection for testing ... a lesser evil
+        Answers = DefaultAnswers
+    } = await optionsSchema.validate(options);
 
     process.title = name;
 
-    const prePromptState = await Answers({ name, loaders: [ sourceExpander ] });
+    const prePromptState = await stateSchema.validate(await Answers({ name, loaders: [ sourceExpander ] }));
 
-    const configSource = isString(prePromptState.source)
-      ? [ prePromptState.source ]
-      : prePromptState.source || [];
+    const configSource = prePromptState.source;
 
-    const source = isString(givenSource)
-      ? [ givenSource, ...configSource ]
-      : [ ...givenSource, ...configSource ];
+    const source = [ ...givenSource, ...configSource ];
 
     const targets = (source.length)
         ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
@@ -88,7 +84,10 @@ async function Targets(options = {}) {
     const queue = Queue({ targets, operations, loaders, args });
 
     const prompts = Prompts(queue);
-    const initialState = await Answers({ name, prompts });
+
+    const initialState = prompts.length
+        ? await Answers({ name, prompts }) // it's expensive to crawl the file system again. previously solved by modification to answers to be able to add prompts to an existing instance, but trying to keep answers simpler and standalone, so just eating the time complexity for now.
+        : prePromptState;
 
     Store.set(initialState);
     Store.setting.set(Store.settingsFromArgv(initialState['--']));
