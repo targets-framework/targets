@@ -99,14 +99,21 @@ describe('Targets', () => {
                 .then(() => expect(console.log).to.have.been.calledWith(sinon.match(/foo/), sinon.match.any));
         });
 
-        it('should reject with an error when target is not found', () => {
+        it('should exit non-zero when target is not found', () => {
 
             const argv = [ 'foo' ];
             const answers = { _: argv };
 
             const { Answers } = setup({ answers });
 
-            return expect(Targets({ argv, targets: {}, Answers })).to.be.rejectedWith(Error, 'invalid target in command');
+            sandbox.stub(process, 'exit');
+            return Targets({ argv, targets: {}, Answers })
+                .then(() => {
+                    return expect(process.exit).to.have.been.calledWith(1);
+                })
+                .catch(() => {
+                    return expect(process.exit).to.have.been.calledWith(1);
+                });
         });
     });
 

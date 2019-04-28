@@ -49,66 +49,77 @@ const {
 } = require('./lib/schema');
 
 async function Targets(options = {}) {
-    const calledFrom = callsites()[1].getFileName();
+    try {
+        const calledFrom = callsites()[1].getFileName();
 
-    const {
-        name,
-        argv,
+        const {
+            name,
+            argv,
 
-        givenTargets,
-        givenSource,
+            givenTargets,
+            givenSource,
 
-        // here be dragons... (untested)
-        customOperations,
-        customLoaders,
+            // here be dragons... (untested)
+            customOperations,
+            customLoaders,
 
-        // dep injection for testing ... a lesser evil
-        Answers = DefaultAnswers
-    } = await optionsSchema.validate(options);
+            // dep injection for testing ... a lesser evil
+            Answers = DefaultAnswers
+        } = await optionsSchema.validate(options);
 
-    process.title = name;
+        process.title = name;
 
-    const { a:prefixedArgv } = argv.reduce((acc, arg) => {
-        const { done, a } = acc;
-        if (/^--$/.test(arg)) return { done: true, a: [ ...a, arg ] };
-        if (!done) {
-            if (/^--.*/.test(arg)) arg = `--config.${arg.slice(2)}`;
-        }
-        return { done, a: [ ...a, arg ] };
-    }, { done: false, a: [] });
+        const { a:prefixedArgv } = argv.reduce((acc, arg) => {
+            const { done, a } = acc;
+            if (/^--$/.test(arg)) return { done: true, a: [ ...a, arg ] };
+            if (!done) {
+                if (/^--.*/.test(arg)) arg = `--config.${arg.slice(2)}`;
+            }
+            return { done, a: [ ...a, arg ] };
+        }, { done: false, a: [] });
 
-    const prePromptState = await stateSchema.validate(await Answers({
-        name,
-        argv: prefixedArgv,
-        loaders: [ sourceExpander ]
-    }));
-
-    const configSource = prePromptState.source;
-
-    const source = [ ...givenSource, ...configSource ];
-
-    const targets = (source.length)
-        ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
-        : givenTargets;
-
-    const args = await InitialPrompt({ targets, argv });
-    const operations = { ...builtinOps, ...customOperations };
-    const loaders = { ...builtinLoaders, ...customLoaders };
-    const queue = Queue({ targets, operations, loaders, args });
-
-    const prompts = Prompts(queue);
-
-    const initialState = prompts.length
-        ? await Answers({ // it's expensive to crawl the file system again. previously solved by modification to answers to be able to add prompts to an existing instance, but trying to keep answers simpler and standalone, so just eating the time complexity for now.
+        const prePromptState = await stateSchema.validate(await Answers({
             name,
             argv: prefixedArgv,
-            prompts
-        })
-        : prePromptState;
+            loaders: [ sourceExpander ]
+        }));
 
-    Store.set(initialState);
-    Store.setting.set(Store.settingsFromArgv(initialState['--']));
+        const configSource = prePromptState.source;
 
-    /* eslint-disable-next-line */
-    for await (const result of Scheduler(queue)) {}
+        const source = [ ...givenSource, ...configSource ];
+
+        const targets = (source.length)
+            ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
+            : givenTargets;
+
+        const args = await InitialPrompt({ targets, argv });
+        const operations = { ...builtinOps, ...customOperations };
+        const loaders = { ...builtinLoaders, ...customLoaders };
+        const queue = Queue({ targets, operations, loaders, args });
+
+        const prompts = Prompts(queue);
+
+        const initialState = prompts.length
+            ? await Answers({ // it's expensive to crawl the file system again. previously solved by modification to answers to be able to add prompts to an existing instance, but trying to keep answers simpler and standalone, so just eating the time complexity for now.
+                name,
+                argv: prefixedArgv,
+                prompts
+            })
+            : prePromptState;
+
+        Store.set(initialState);
+        Store.setting.set(Store.settingsFromArgv(initialState['--']));
+
+        /* eslint-disable-next-line */
+        for await (const result of Scheduler(queue)) {}
+
+    } catch (e) {
+        if (e.name === 'ValidationError') {
+            console.error(`Validation Errors:\n${e.details.map(d => `  • ${d.message}`).join('\n')}\n`);
+            console.error(e.annotate());
+        } else {
+            console.error(e && e.message ? e.message : e);
+        }
+        process.exit(1);
+    }
 }
