@@ -70,7 +70,7 @@ async function Targets(options = {}) {
 
     const { a:prefixedArgv } = argv.reduce((acc, arg) => {
         const { done, a } = acc;
-        if (/^--\s/.test(arg)) return { done: true, a: [ ...a, arg ] };
+        if (/^--$/.test(arg)) return { done: true, a: [ ...a, arg ] };
         if (!done) {
             if (/^--.*/.test(arg)) arg = `--config.${arg.slice(2)}`;
         }
