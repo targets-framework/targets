@@ -68,7 +68,20 @@ async function Targets(options = {}) {
 
     process.title = name;
 
-    const prePromptState = await stateSchema.validate(await Answers({ name, loaders: [ sourceExpander ] }));
+    const { a:prefixedArgv } = argv.reduce((acc, arg) => {
+        const { done, a } = acc;
+        if (/^--\s/.test(arg)) return { done: true, a: [ ...a, arg ] };
+        if (!done) {
+            if (/^--.*/.test(arg)) arg = `--config.${arg.slice(2)}`;
+        }
+        return { done, a: [ ...a, arg ] };
+    }, { done: false, a: [] });
+
+    const prePromptState = await stateSchema.validate(await Answers({
+        name,
+        argv: prefixedArgv,
+        loaders: [ sourceExpander ]
+    }));
 
     const configSource = prePromptState.source;
 
@@ -86,7 +99,11 @@ async function Targets(options = {}) {
     const prompts = Prompts(queue);
 
     const initialState = prompts.length
-        ? await Answers({ name, prompts }) // it's expensive to crawl the file system again. previously solved by modification to answers to be able to add prompts to an existing instance, but trying to keep answers simpler and standalone, so just eating the time complexity for now.
+        ? await Answers({ // it's expensive to crawl the file system again. previously solved by modification to answers to be able to add prompts to an existing instance, but trying to keep answers simpler and standalone, so just eating the time complexity for now.
+            name,
+            argv: prefixedArgv,
+            prompts
+        })
         : prePromptState;
 
     Store.set(initialState);
