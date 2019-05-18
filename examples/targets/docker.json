@@ -21,7 +21,7 @@
                 {
                     "name": "tag",
                     "type": "template",
-                    "template": "${registry ? `${registry}/` : ''}${name}:${version}"
+                    "template": [ "--tag", "${registry ? `${registry}/` : ''}${name}:${version}" ]
                 }
             ]
         },

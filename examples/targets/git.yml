@@ -1,0 +1,37 @@
+kind: shell
+spec:
+  command: git
+  args:
+  - command: checkout
+    args:
+    - name: b
+      type: flag
+      useValue: true
+      without: B
+    - name: B
+      type: flag
+      useValue: true
+      without: b
+    - name: track
+      type: option
+      without: no-track
+    - name: no-track
+      type: option
+      without: track
+    - name: start-point
+      type: value
+  - command: clone
+    args:
+    - name: url
+      type: value
+    - name: dest
+      type: value
+  - command: rev-parse
+    args:
+    - name: short
+      type: option
+      join: '='
+      default: 12
+    - name: refspec
+      type: value
+      default: HEAD
