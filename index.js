@@ -77,12 +77,12 @@ async function Targets(options = {}) {
             }
             return { done, a: [ ...a, arg ] };
         }, { done: false, a: [] });
-
-        const prePromptState = await stateSchema.validate(await Answers({
+        let prePromptState = await Answers({
             name,
             argv: prefixedArgv,
             loaders: [ sourceExpander ]
-        }));
+        });
+        prePromptState = await stateSchema.validate(prePromptState);
 
         const configSource = prePromptState.source;
 
