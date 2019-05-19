@@ -24,14 +24,11 @@
 
 'use strict';
 
-if (process.versions.node.split('.')[0] < 10) throw new Error('targets requires Node.js version 10 or newer.');
+if (process.versions.node.split('.')[0] < 10) throw new Error('targets requires Node.js version 10.3.0 or newer.');
 
 module.exports = Targets;
 
 const { load, sourceExpander } = require('./lib/load');
-Targets.load = load;
-Targets.Spawn = require('./lib/Spawn');
-
 const path = require('path');
 const Queue = require('./lib/Queue');
 const InitialPrompt = require('./lib/InitialPrompt');
@@ -53,35 +50,41 @@ async function Targets(options = {}) {
         const calledFrom = callsites()[1].getFileName();
 
         const {
-            name,
-            argv,
+            name = 'targets',
+            argv = process.argv.slice(2),
+            targets:givenTargets = {},
+            source:givenSource,
 
-            givenTargets,
-            givenSource,
+            /**
+             * Here Be Dragons:
+             * Custom operations and loaders work in theory but are yet to be
+             * tested.
+             */
+            operators:customOperations,
+            loaders:customLoaders,
 
-            // here be dragons... (untested)
-            customOperations,
-            customLoaders,
+            /**
+             * Dependency injection is used to support testing. A lesser evil,
+             * however unsightly.
+             */
+            __Answers__:Answers = DefaultAnswers
 
-            // dep injection for testing ... a lesser evil
-            Answers = DefaultAnswers
         } = await optionsSchema.validate(options);
 
         process.title = name;
 
-        const { a:prefixedArgv } = argv.reduce((acc, arg) => {
-            const { done, a } = acc;
-            if (/^--$/.test(arg)) return { done: true, a: [ ...a, arg ] };
-            if (!done) {
-                if (/^--.*/.test(arg)) arg = `--config.${arg.slice(2)}`;
-            }
-            return { done, a: [ ...a, arg ] };
-        }, { done: false, a: [] });
+        /**
+         * Prefix command-line options as `--config.${keypath}` so that they are
+         * quaratined to `config` namespace in the global store.
+         */
+        const prefixedArgv = Store.prefixOptions(argv);
+
         let prePromptState = await Answers({
             name,
             argv: prefixedArgv,
             loaders: [ sourceExpander ]
         });
+
         prePromptState = await stateSchema.validate(prePromptState);
 
         const configSource = prePromptState.source;
@@ -100,7 +103,14 @@ async function Targets(options = {}) {
         const prompts = Prompts(queue);
 
         const initialState = prompts.length
-            ? await Answers({ // it's expensive to crawl the file system again. previously solved by modification to answers to be able to add prompts to an existing instance, but trying to keep answers simpler and standalone, so just eating the time complexity for now.
+            /**
+             * It's expensive and non-transactional to crawl the file system yet
+             * again, but alas. Previously, this was solved by modifications to
+             * Answers to be able to add prompts to an existing instance, but in
+             * trying to keep Answers simpler and standalone, we've decided just
+             * to eat the time complexity and take the hit for now.
+             */
+            ? await Answers({
                 name,
                 argv: prefixedArgv,
                 prompts
@@ -110,6 +120,9 @@ async function Targets(options = {}) {
         Store.set(initialState);
         Store.setting.set(Store.settingsFromArgv(initialState['--']));
 
+        /**
+         * Time to kick of the main loop! ...and it's all just side-effects.
+         */
         /* eslint-disable-next-line */
         for await (const result of Scheduler(queue)) {}
 
@@ -123,3 +136,7 @@ async function Targets(options = {}) {
         process.exit(1);
     }
 }
+
+// Wherein we expose a few subsystem components for power users...
+Targets.load = load;
+Targets.Spawn = require('./lib/Spawn');
