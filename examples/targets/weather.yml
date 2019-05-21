@@ -3,5 +3,5 @@ spec:
 - '@silent/on'
 - weather.data
 - '@silent/off'
-- '@result.weather.data::config.weather.data'
+- '@bind/result.weather.data::config.weather.data'
 - 'weather.sky,weather.temp'

@@ -132,6 +132,7 @@ async function Targets(options = {}) {
             console.error(e.annotate());
         } else {
             console.error(e && e.message ? e.message : e);
+            //e && e.stack && console.error(e.stack);
         }
         process.exit(1);
     }
