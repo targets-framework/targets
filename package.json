@@ -40,6 +40,7 @@
     "lodash": "^4.17.11",
     "mem": "^3.0.1",
     "needful": "^1.8.2",
+    "requireg": "^0.2.1",
     "shellspec": "0.0.5",
     "stream-line-wrapper": "0.1.1",
     "stream-to-promise": "^2.2.0",
