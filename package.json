@@ -1,11 +1,11 @@
 {
   "name": "targets",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "a task orchestration and composition framework",
   "main": "index.js",
   "bin": {
-      "targets": "./bin/index.js",
-      "t": "./bin/index.js"
+    "targets": "./bin/index.js",
+    "t": "./bin/index.js"
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
