@@ -3,7 +3,10 @@
   "version": "1.9.1",
   "description": "a task orchestration and composition framework",
   "main": "index.js",
-  "bin": "./bin/index.js",
+  "bin": {
+      "targets": "./bin/index.js",
+      "t": "./bin/index.js"
+  },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "test": "./node_modules/.bin/mocha \"test/**/*.spec.js\"",
