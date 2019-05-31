@@ -45,7 +45,7 @@
     "needful": "^1.8.2",
     "requireg": "^0.2.1",
     "resolve-global": "^1.0.0",
-    "shellspec": "0.1.2",
+    "shellspec": "0.1.4",
     "stream-line-wrapper": "0.1.1",
     "stream-to-promise": "^2.2.0",
     "sugarmerge": "^0.2.5"
