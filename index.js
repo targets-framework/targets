@@ -75,23 +75,19 @@ async function Targets(options = {}) {
 
         /**
          * Prefix command-line options as `--config.${keypath}` so that they are
-         * quaratined to `config` namespace in the global store.
+         * scoped to `config` namespace in the global store.
          */
         const prefixedArgv = Store.prefixOptions(argv);
 
-        let prePromptState = await Answers({
+        const fsState = await stateSchema.validate(await Answers({
             name,
             argv: prefixedArgv,
             loaders: [ sourceExpander ]
-        });
+        }));
 
-        prePromptState = await stateSchema.validate(prePromptState);
+        const source = [ ...givenSource, ...fsState.source ];
 
-        const configSource = prePromptState.source;
-
-        const source = [ ...givenSource, ...configSource ];
-
-        const targets = (source.length)
+        const targets = source.length
             ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
             : givenTargets;
 
@@ -115,7 +111,7 @@ async function Targets(options = {}) {
                 argv: prefixedArgv,
                 prompts
             })
-            : prePromptState;
+            : fsState;
 
         Store.set(initialState);
         Store.setting.set(Store.settingsFromArgv(initialState['--']));
