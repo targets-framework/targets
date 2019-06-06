@@ -94,7 +94,7 @@ async function Targets(options = {}) {
         const args = await InitialPrompt({ targets, argv });
         const operations = { ...builtinOps, ...customOperations };
         const loaders = { ...builtinLoaders, ...customLoaders };
-        const queue = Queue({ targets, operations, loaders, args });
+        const queue = await Queue({ targets, operations, loaders, args });
 
         const prompts = Prompts(queue);
 
@@ -128,7 +128,7 @@ async function Targets(options = {}) {
             console.error(e.annotate());
         } else {
             console.error(e && e.message ? e.message : e);
-            //e && e.stack && console.error(e.stack);
+            e && e.stack && console.error(e.stack);
         }
         process.exit(1);
     }
