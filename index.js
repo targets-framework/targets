@@ -94,7 +94,7 @@ async function Targets(options = {}) {
         const args = await InitialPrompt({ targets, argv });
         const operations = { ...builtinOps, ...customOperations };
         const loaders = { ...builtinLoaders, ...customLoaders };
-        const queue = await Queue({ targets, operations, loaders, args });
+        const queue = Queue({ targets, operations, loaders, args });
 
         const prompts = Prompts(queue);
 
