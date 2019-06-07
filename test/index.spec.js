@@ -216,7 +216,7 @@ describe('Targets', () => {
 
     });
 
-    describe('@when', () => {
+    describe.only('@when', () => {
 
         it('should execute given target given truthy result of predicate', () => {
 

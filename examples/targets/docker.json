@@ -1,33 +1,10 @@
 {
     "kind": "shell",
+    "version": "1.0.0",
     "spec": {
-        "command": "docker",
-        "collections": {
-            "tag": [
-                {
-                    "name": "registry",
-                    "type": "variable"
-                },
-                {
-                    "name": "name",
-                    "type": "variable",
-                    "required": true
-                },
-                {
-                    "name": "version",
-                    "type": "variable",
-                    "default": "latest"
-                },
-                {
-                    "name": "tag",
-                    "type": "variable",
-                    "value": "${registry ? `${registry}/` : ''}${name}:${version}"
-                }
-            ]
-        },
-        "args": [
-            {
-                "command": "build",
+        "main": "docker",
+        "commands": {
+            "build": {
                 "args": [
                     {
                         "name": "tag",
@@ -74,8 +51,7 @@
                     }
                 ]
             },
-            {
-                "command": "run",
+            "run": {
                 "args": [
                     "add-host",
                     "attach",
@@ -199,8 +175,7 @@
                     }
                 ]
             },
-            {
-                "command": "push",
+            "push": {
                 "args": [
                     {
                         "name": "disable-content-trust",
@@ -213,6 +188,29 @@
                     }
                 ]
             }
-        ]
+        },
+        "collections": {
+            "tag": [
+                {
+                    "name": "registry",
+                    "type": "variable"
+                },
+                {
+                    "name": "name",
+                    "type": "variable",
+                    "required": true
+                },
+                {
+                    "name": "version",
+                    "type": "variable",
+                    "default": "latest"
+                },
+                {
+                    "name": "tag",
+                    "type": "variable",
+                    "value": "${registry ? `${registry}/` : ''}${name}:${version}"
+                }
+            ]
+        }
     }
 }

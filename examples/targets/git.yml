@@ -1,37 +1,1806 @@
 kind: shell
+version: 1.0.0
 spec:
-  command: git
-  args:
-  - command: checkout
-    args:
-    - name: b
+  main: git
+  versions:
+    default: 2.21.0
+    latest: 2.21.0
+    stable: 2.21.0
+    2.21.0:
+      args:
+      - name: version
+        type: option
+        useValue: false
+      - name: help
+        type: option
+        useValue: false
+      - name: C
+        type: flag
+        useValue: true
+      - name: c
+        type: flag
+        join: '='
+        useValue: true
+      - name: exec-path
+        type: option
+        join: '='
+        useValue: true
+      - name: html-path
+        type: option
+        useValue: false
+      - name: man-path
+        type: option
+        useValue: false
+      - name: info-path
+        type: option
+        useValue: false
+      - name: p
+        type: flag
+        without:
+        - paginate
+        - P
+        - no-pager
+      - name: paginate
+        type: option
+        without:
+        - p
+        - P
+        - no-pager
+      - name: P
+        type: option
+        without:
+        - paginate
+        - p
+        - no-pager
+      - name: no-pager
+        type: option
+        without:
+        - P
+        - paginate
+        - p
+      - name: no-replace-objects
+        type: option
+        useValue: false
+      - name: bare
+        type: option
+        useValue: false
+      - name: git-dir
+        type: option
+        join: '='
+        useValue: true
+      - name: work-tree
+        type: option
+        join: '='
+        useValue: true
+      - name: namespace
+        type: option
+        join: '='
+        useValue: true
+      - name: super-prefix
+        type: option
+        join: '='
+        useValue: true
+      commands:
+        config:
+          args:
+          - name: e
+            type: flag
+            without: edit
+          - name: edit
+            type: option
+            useValue: false
+            without: e
+          - name: file-option
+            type: value
+          - name: type
+            type: option
+            join: '='
+          - name: no-type
+            type: option
+            useValue: false
+          - name: show-origin
+            type: option
+            useValue: false
+          - name: z
+            type: flag
+            without: 'null'
+          - name: 'null'
+            type: option
+            useValue: false
+            without: z
+          - name: l
+            type: flag
+            without: list
+          - name: list
+            type: option
+            useValue: false
+            without: l
+          - name: name-only
+            type: option
+            useValue: false
+          - name: get-regexp
+            type: option
+            useValue: false
+            with: name_regex
+          - name: get-urlmatch
+            type: option
+            with:
+            - name
+            - url
+          - name: add
+            type: option
+            useValue: false
+            with:
+            - name
+            - value
+          - name: replace-all
+            type: option
+            useValue: false
+            with:
+            - name
+            - value
+          - name: get
+            type: option
+            useValue: false
+            with: name
+          - name: get-all
+            type: option
+            useValue: false
+            with: name
+          - name: unset
+            type: option
+            useValue: false
+          - name: unset-all
+            type: option
+            useValue: false
+          - name: rename-section
+            type: option
+            useValue: false
+            with:
+            - old_name
+            - new_name
+          - name: remove-section
+            type: option
+            useValue: false
+            with: name
+          - name: get-color
+            type: option
+            useValue: false
+            without: get-colorbool
+          - name: get-color
+            type: option
+            useValue: false
+            without: get-color
+          - name: name
+            type: value
+          - name: name_regex
+            type: value
+          - name: value
+            type: value
+          - name: value_regex
+            type: value
+          - name: url
+            type: value
+          - name: old_name
+            type: value
+          - name: new_name
+            type: value
+          - name: default
+            type: value
+          - name: stdout-is-tty
+            type: value
+        help:
+          args:
+          - name: a
+            type: flag
+            without: all
+          - name: all
+            type: option
+            useValue: false
+            without: a
+          - name: verbose
+            type: option
+            useValue: false
+            with: a
+          - name: g
+            type: flag
+            without: guide
+          - name: guide
+            type: option
+            useValue: false
+            without: g
+          - name: i
+            type: flag
+            without:
+            - info
+            - m
+            - man
+            - w
+            - web
+          - name: info
+            type: option
+            useValue: false
+            without:
+            - i
+            - m
+            - man
+            - w
+            - web
+          - name: m
+            type: flag
+            without:
+            - info
+            - i
+            - man
+            - w
+            - web
+          - name: man
+            type: option
+            useValue: false
+            without:
+            - info
+            - i
+            - m
+            - w
+            - web
+          - name: w
+            type: flag
+            without:
+            - info
+            - i
+            - m
+            - man
+            - web
+          - name: web
+            type: option
+            useValue: false
+            without:
+            - info
+            - i
+            - m
+            - man
+            - w
+          - name: command
+            type: value
+            without: guide
+          - name: guide
+            type: value
+            without: command
+        init:
+          args:
+          - name: q
+            type: flag
+            without: quiet
+          - name: quiet
+            type: option
+            useValue: false
+            without: q
+          - name: bare
+            type: option
+            useValue: false
+          - name: template
+            type: option
+            join: '='
+          - name: separate-git-dir
+            type: option
+            join: '='
+          - name: shared
+            type: option
+            useValue: string
+            join: '='
+          - name: directory
+            type: value
+        clone:
+          args:
+          - name: template
+            type: option
+            join: '='
+          - name: local
+            type: option
+            useValue: false
+            without: l
+          - name: l
+            type: flag
+            without: local
+          - name: shared
+            type: option
+            useValue: false
+            without: s
+          - name: s
+            type: flag
+            without: shared
+          - name: no-hardlinks
+            type: option
+            useValue: false
+          - name: verbose
+            type: collection
+          - name: quiet
+            type: collection
+          - name: progress
+            type: option
+            useValue: false
+          - name: no-checkout
+            type: option
+            useValue: false
+            without: n
+          - name: n
+            type: flag
+            without: no-checkout
+          - name: bare
+            type: option
+            useValue: false
+          - name: mirror
+            type: option
+            useValue: false
+          - name: origin
+            type: option
+            without: o
+          - name: o
+            type: flag
+            useValue: true
+            without: origin
+          - name: branch
+            type: option
+            without: b
+          - name: b
+            type: flag
+            useValue: true
+            without: branch
+          - name: upload-pack
+            type: option
+            without: u
+          - name: u
+            type: flag
+            useValue: true
+            without: upload-pack
+          - name: reference
+            type: option
+          - name: dissociate
+            type: option
+            useValue: false
+          - name: separate-git-dir
+            type: option
+          - name: depth
+            type: option
+          - name: single-branch
+            type: option
+            useValue: false
+            without: no-single-branch
+          - name: no-single-branch
+            type: option
+            useValue: false
+            without: single-branch
+          - name: no-tags
+            type: option
+            useValue: false
+          - name: recurse-submodules
+            type: option
+            join: '='
+          - name: shallow-submodules
+            type: option
+            useValue: false
+            without: no-shallow-submodules
+          - name: no-shallow-submodules
+            type: option
+            useValue: false
+            without: shallow-submodules
+          - name: jobs
+            type: option
+          - name: --
+            type: value
+            value: --
+          - name: repository
+            type: value
+            required: 'true'
+          - name: directory
+            type: value
+            with: repository
+        add:
+          args:
+          - name: verbose
+            type: collection
+          - name: quiet
+            type: collection
+          - name: dry-run
+            type: collection
+          - name: force
+            type: collection
+          - name: interactive
+            type: collection
+          - name: edit
+            type: option
+            useValue: false
+            without: e
+          - name: e
+            type: flag
+            without: edit
+          - name: all
+            type: option
+            useValue: false
+            without:
+            - no-all
+            - ignore-removal
+            - no-ignore-removal
+            - update
+            - u
+          - name: no-all
+            type: option
+            useValue: false
+            without:
+            - all
+            - ignore-removal
+            - no-ignore-removal
+            - update
+            - u
+          - name: ignore-removal
+            type: option
+            useValue: false
+            without:
+            - all
+            - no-all
+            - no-ignore-removal
+            - update
+            - u
+          - name: update
+            type: option
+            useValue: false
+            without:
+            - all
+            - no-all
+            - ignore-removal
+            - no-ignore-removal
+            - u
+          - name: u
+            type: flag
+            without:
+            - all
+            - no-all
+            - ignore-removal
+            - no-ignore-removal
+            - update
+          - name: intent-to-add
+            type: option
+            useValue: false
+            without: N
+          - name: N
+            type: flag
+            without: intent-to-add
+          - name: refresh
+            type: option
+            useValue: false
+          - name: ignore-errors
+            type: option
+            useValue: false
+          - name: ignore-missing
+            type: option
+            useValue: false
+          - name: renormalize
+            type: option
+            useValue: false
+          - name: chmod
+            type: option
+            join: '='
+            choices:
+            - +x
+            - -x
+          - name: pathspec
+            type: --
+        status:
+          args:
+          - name: short
+            type: option
+            useValue: false
+            without: s
+          - name: s
+            type: flag
+            without: short
+          - name: branch
+            type: option
+            useValue: false
+            without: b
+          - name: b
+            type: flag
+            without: branch
+          - name: show-stash
+            type: option
+            useValue: false
+          - name: porcelain
+            type: option
+            useValue: string
+            join: '='
+          - name: long
+            type: option
+            useValue: false
+          - name: verbose
+            type: collection
+          - name: quiet
+            type: collection
+          - name: u
+            type: flag
+            useValue: string
+            join: ''
+            without: untracked-files
+            choices:
+            - 'no'
+            - normal
+            - all
+          - name: untracked-files
+            type: option
+            useValue: string
+            join: '='
+            without: u
+            choices:
+            - 'no'
+            - normal
+            - all
+          - name: ignore-submodules
+            type: option
+            useValue: string
+            join: '='
+            choices:
+            - none
+            - untracked
+            - dirty
+            - all
+          - name: ignored
+            type: option
+            useValue: string
+            join: '='
+            choices:
+            - traditional
+            - 'no'
+            - matching
+          - name: z
+            type: flag
+          - name: column
+            type: option
+            useValue: string
+            join: '='
+            without: no-column
+          - name: no-column
+            type: option
+            useValue: false
+            without: column
+          - name: ahead-behind
+            type: option
+            useValue: false
+            without: no-ahead-behind
+          - name: no-ahead-behind
+            type: option
+            useValue: false
+            without: ahead-behind
+          - name: renames
+            type: option
+            useValue: false
+            without: no-renames
+          - name: no-renames
+            type: option
+            useValue: false
+            without: renames
+          - name: find-renames
+            type: option
+            useValue:
+            - string
+            - number
+            join: '='
+          - name: pathspec
+            type: --
+        diff:
+          args:
+          - name: diffcore
+            type: collection
+          - name: '1'
+            type: flag
+            without:
+            - '2'
+            - '3'
+            - base
+            - ours
+            - theirs
+          - name: '2'
+            type: flag
+            without:
+            - '1'
+            - '3'
+            - base
+            - ours
+            - theirs
+          - name: '3'
+            type: flag
+            without:
+            - '1'
+            - '2'
+            - base
+            - ours
+            - theirs
+          - name: base
+            type: option
+            useValue: false
+            without:
+            - '1'
+            - '2'
+            - '3'
+            - ours
+            - theirs
+          - name: ours
+            type: option
+            useValue: false
+            without:
+            - '1'
+            - '2'
+            - '3'
+            - base
+            - theirs
+          - name: theirs
+            type: option
+            useValue: false
+            without:
+            - '1'
+            - '2'
+            - '3'
+            - base
+            - ours
+          - name: '0'
+            type: flag
+          - name: cached
+            type: option
+            useValue: false
+            without: no-index
+          - name: no-index
+            type: option
+            useValue: false
+            without: cached
+          - name: commit
+            type: value
+            without:
+            - commits
+            - blobs
+          - name: commits
+            type: values
+            without:
+            - commit
+            - blobs
+          - name: blobs
+            type: values
+            without:
+            - commit
+            - commits
+          - name: path
+            type: --
+            without: paths
+          - name: paths
+            type: --
+            without: path
+        commit:
+          args:
+          - name: all
+            type: collection
+          - name: interactive
+            type: collection
+          - name: patch
+            type: collection
+          - name: template
+            type: option
+            join: '='
+            without: t
+          - name: t
+            type: flag
+            useValue: true
+            without: template
+          - name: signoff
+            type: option
+            useValue: false
+            without: s
+          - name: s
+            type: flag
+            without: signoff
+          - name: verbose
+            type: collection
+          - name: quiet
+            type: collection
+          - name: untracked-files
+            type: option
+            useValue: string
+            join: '='
+            choices:
+            - 'no'
+            - normal
+            - all
+            without: u
+          - name: u
+            type: flag
+            useValue: string
+            join: ''
+            choices:
+            - 'no'
+            - normal
+            - all
+            without: untracked-files
+          - name: amend
+            type: option
+            useValue: false
+          - name: dry-run
+            type: option
+            useValue: false
+          - name: c
+            type: flag
+            useValue: true
+            without:
+            - C
+            - fixup
+            - squash
+          - name: C
+            type: flag
+            useValue: true
+            without:
+            - c
+            - fixup
+            - squash
+          - name: fixup
+            type: option
+            without:
+            - c
+            - C
+            - squash
+          - name: squash
+            type: option
+            without:
+            - c
+            - C
+            - fixup
+          - name: file
+            type: option
+            join: '='
+            without:
+            - F
+            - m
+            - message
+          - name: F
+            type: flag
+            useValue: true
+            without:
+            - file
+            - m
+            - message
+          - name: message
+            type: option
+            join: '='
+            without:
+            - F
+            - f
+            - m
+            aka: m
+            required: true
+          - name: m
+            type: flag
+            useValue: true
+            without:
+            - F
+            - file
+            - message
+            aka: message
+            required: true
+          - name: reset-author
+            type: option
+            useValue: false
+          - name: allow-empty
+            type: option
+            useValue: false
+          - name: allow-empty-message
+            type: option
+            useValue: false
+          - name: no-verify
+            type: option
+            useValue: false
+            without: n
+          - name: n
+            type: flag
+            without: no-verify
+          - name: edit
+            type: option
+            useValue: false
+            without: e
+          - name: e
+            type: flag
+            without: edit
+          - name: author
+            type: option
+            join: '='
+          - name: date
+            type: option
+            join: '='
+          - name: cleanup
+            type: option
+            join: '='
+            choices:
+            - strip
+            - whitespace
+            - verbatim
+            - scissors
+            - default
+          - name: status
+            type: option
+            useValue: false
+            without: no-status
+          - name: no-status
+            type: option
+            useValue: false
+            without: status
+          - name: input
+            type: option
+            useValue: false
+            without: i
+          - name: i
+            type: flag
+            without: input
+          - name: only
+            type: option
+            useValue: false
+            without: o
+          - name: o
+            type: flag
+            without: only
+          - name: gpg-sign
+            type: option
+            useValue: string
+            join: '='
+            without:
+            - no-gpg-sign
+            - S
+          - name: no-gpg-sign
+            type: option
+            useValue: false
+            without:
+            - gpg-sign
+            - S
+          - name: S
+            type: flag
+            useValue: string
+            join: ''
+            without:
+            - no-gpg-sign
+            - gpg-sign
+          - name: file
+            type: --
+            without: files
+          - name: files
+            type: --
+            without: file
+        reset:
+          args:
+          - name: patch
+            type: option
+            useValue: false
+            without: p
+          - name: p
+            type: flag
+            without: patch
+          - name: soft
+            type: option
+            useValue: false
+            without:
+            - mixed
+            - hard
+            - merge
+            - keep
+          - name: mixed
+            type: option
+            useValue: false
+            without:
+            - soft
+            - hard
+            - merge
+            - keep
+          - name: N
+            type: flag
+            with: mixed
+          - name: hard
+            type: option
+            useValue: false
+            without:
+            - soft
+            - mixed
+            - merge
+            - keep
+          - name: merge
+            type: option
+            useValue: false
+            without:
+            - soft
+            - mixed
+            - hard
+            - keep
+          - name: keep
+            type: option
+            useValue: false
+            without:
+            - soft
+            - mixed
+            - hard
+            - merge
+          - name: quiet
+            type: collection
+          - name: tree-ish
+            type: value
+            without: commit
+          - name: commit
+            type: value
+            without: tree-ish
+          - name: paths
+            type: --
+        rm:
+          args:
+          - name: force
+            type: collection
+          - name: dry-run
+            type: collection
+          - name: r
+            type: flag
+          - name: cached
+            type: option
+            useValue: false
+          - name: ignore-unmatch
+            type: option
+            useValue: false
+          - name: quiet
+            type: collection
+          - name: file
+            type: --
+            without: files
+          - name: files
+            type: --
+            without: file
+        mv:
+          args:
+          - name: verbose
+            type: collection
+          - name: force
+            type: collection
+          - name: k
+            type: flag
+          - name: dry-run
+            type: collection
+          - name: source
+            type: value
+            required: true
+          - name: destination
+            type: value
+            required: true
+        branch:
+          args:
+          - name: color-options
+            type: collection
+          - name: remotes
+            type: option
+            useValue: false
+            without:
+            - r
+            - a
+            - all
+          - name: r
+            type: flag
+            without:
+            - remotes
+            - a
+            - all
+            unless:
+            - d
+            - D
+          - name: all
+            type: option
+            useValue: false
+            without:
+            - remotes
+            - r
+            - all
+          - name: a
+            type: flag
+            without:
+            - remotes
+            - r
+            - a
+          - name: list
+            type: option
+            useValue: false
+          - name: verbose
+            type: collection
+          - name: quiet
+            type: collection
+          - name: abbrev
+            type: collection
+          - name: column
+            type: option
+            useValue: string
+            without: no-column
+          - name: no-column
+            type: option
+            useValue: false
+            without: column
+          - name: sort
+            type: option
+            join: '='
+          - name: merged
+            type: option
+            without: no-merged
+          - name: no-merged
+            type: option
+            without: merged
+          - name: contains
+            type: option
+            without: no-contains
+          - name: no-contains
+            type: option
+            without: contains
+          - name: points-at
+            type: option
+          - name: format
+            type: option
+            join: '='
+          - name: pattern
+            type: value
+          - name: track
+            type: option
+            useValue: false
+            without: no-track
+          - name: no-track
+            type: option
+            useValue: false
+            without: track
+          - name: force
+            type: collection
+          - name: set-upstream-to
+            type: option
+            join: '='
+            without:
+            - u
+            - unset-upstream
+          - name: u
+            type: flag
+            useValue: true
+            without:
+            - set-upstream-to
+            - unset-upstream
+          - name: unset-upstream
+            type: option
+            useValue: false
+            without:
+            - set-upstream-to
+            - u
+          - name: m
+            type: flag
+            without: M
+          - name: M
+            type: flag
+            without: m
+          - name: c
+            type: flag
+            without: C
+          - name: C
+            type: flag
+            without: c
+          - name: d
+            type: flag
+            without: D
+            with: branchname
+          - name: D
+            type: flag
+            without: d
+            with: branchname
+          - name: r
+            type: flag
+            when:
+            - d
+            - D
+          - name: edit-description
+            type: option
+            useValue: false
+          - name: branchname
+            type: value
+            without:
+            - oldbranch
+            - newbranch
+          - name: start-point
+            type: value
+            with: branchname
+          - name: oldbranch
+            type: value
+            with:
+            - newbranch
+            without:
+            - branchname
+          - name: newbranch
+            type: value
+            without:
+            - branchname
+        checkout:
+          args:
+          - name: quiet
+            type: collection
+          - name: force
+            type: collection
+          - name: ours
+            type: option
+            useValue: false
+            without:
+            - f
+            - force
+            - theirs
+            - m
+            - conflict
+          - name: theirs
+            type: option
+            useValue: false
+            without:
+            - f
+            - force
+            - ours
+            - m
+            - conflict
+          - name: m
+            type: flag
+            without:
+            - f
+            - force
+            - ours
+            - theirs
+            - conflict
+          - name: conflict
+            type: option
+            useValue: true
+            join: '='
+            without:
+            - f
+            - force
+            - ours
+            - m
+            - theirs
+            choices:
+            - merge
+            - diff3
+          - name: merge
+            type: option
+            useValue: false
+            without: m
+          - name: m
+            type: flag
+            without: merge
+          - name: detach
+            type: option
+            useValue: false
+          - name: b
+            type: flag
+            useValue: true
+            without:
+            - B
+            - orphan
+            - branch
+            - commit
+          - name: B
+            type: flag
+            useValue: true
+            without:
+            - b
+            - orphan
+            - branch
+            - commit
+          - name: orphan
+            type: option
+            without:
+            - b
+            - B
+            - branch
+            - commit
+          - name: track
+            type: option
+            without: no-track
+          - name: no-track
+            type: option
+            without: track
+          - name: patch
+            type: option
+            useValue: false
+            without: p
+          - name: p
+            type: flag
+            without: patch
+          - name: ignore-other-worktrees
+            type: option
+            useValue: false
+          - name: recurse-submodules
+            type: option
+            useValue: false
+            without: no-recurse-submodules
+          - name: no-recurse-submodules
+            type: option
+            useValue: false
+            without: recurse-submodules
+          - name: no-guess
+            type: option
+            useValue: false
+          - name: start-point
+            type: value
+            without:
+            - branch
+            - commit
+            - tree-ish
+          - name: commit
+            type: value
+            without:
+            - branch
+            - start-point
+            - tree-ish
+          - name: branch
+            type: value
+            without:
+            - commit
+            - start-point
+            - tree-ish
+          - name: tree-ish
+            type: value
+            without:
+            - branch
+            - commit
+            - start-point
+          - name: path
+            type: --
+            without:
+            - paths
+            - pathspec
+          - name: paths
+            type: --
+            without:
+            - path
+            - pathspec
+          - name: pathspec
+            type: --
+            without:
+            - path
+            - paths
+        rev-parse:
+          args:
+          - name: short
+            type: option
+            join: '='
+            default: 12
+          - name: refspec
+            type: value
+            default: HEAD
+        push:
+          args:
+          - name: tags
+            type: option
+            useValue: false
+        pull:
+          args:
+          - name: rebase
+            type: option
+            useValue: false
+            without: r
+          - name: r
+            type: flag
+            without: rebase
+  collections:
+    verbose:
+    - name: v
+      type: flag
+      without:
+      - vv
+      - verbose
+    - name: vv
+      type: flag
+      without:
+      - v
+      - verbose
+    - name: verbose
+      type: option
+      useValue: false
+      without:
+      - v
+      - vv
+    abbrev:
+    - name: abbrev
+      type: option
+      join: '='
+      with:
+      - v
+      - vv
+      - verbose
+      without: no-abbrev
+    - name: no-abbrev
+      type: option
+      useValue: false
+      with:
+      - v
+      - vv
+      - verbose
+      without: abbrev
+    quiet:
+    - name: q
+      type: flag
+      without:
+      - quiet
+      - v
+      - vv
+      - verbose
+      - abbrev
+      - no-abbrev
+    - name: quiet
+      type: option
+      useValue: false
+      without:
+      - q
+      - v
+      - vv
+      - verbose
+      - abbrev
+      - no-abbrev
+    dry-run:
+    - name: dry-run
+      type: option
+      useValue: false
+      without: n
+    - name: n
+      type: flag
+      without: dry-run
+    force:
+    - name: force
+      type: option
+      useValue: false
+      without: f
+    - name: f
+      type: flag
+      without: force
+    all:
+    - name: all
+      type: option
+      useValue: false
+      without: a
+    - name: a
+      type: flag
+      without: all
+    patch:
+    - name: patch
+      type: option
+      useValue: false
+      without: p
+    - name: p
+      type: flag
+      without: patch
+    interactive:
+    - name: interactive
+      type: option
+      useValue: false
+      without: i
+    - name: i
+      type: flag
+      without: interactive
+    color-options:
+    - name: color
+      type: option
+      useValue: string
+      choices:
+      - true
+      - always
+      - never
+      - auto
+      without: no-color
+    - name: no-color
+      type: option
+      useValue: false
+      without: color
+    diffcore:
+    - name: patch
+      type: option
+      useValue: false
+      without:
+      - p
+      - u
+      - s
+      - no-patch
+    - name: p
+      type: flag
+      without:
+      - patch
+      - u
+      - s
+      - no-patch
+    - name: u
+      type: flag
+      without:
+      - patch
+      - p
+      - s
+      - no-patch
+    - name: no-patch
+      type: option
+      useValue: false
+      without:
+      - p
+      - u
+      - s
+      - patch
+    - name: s
+      type: flag
+      without:
+      - patch
+      - p
+      - u
+      - no-patch
+    - name: unified
+      type: option
+      join: ''
+      without: U
+    - name: U
       type: flag
       useValue: true
+      join: ''
+      without: unified
+    - name: raw
+      type: option
+      useValue: false
+    - name: patch-with-raw
+      type: option
+      useValue: false
+    - name: indent-heuristic
+      type: option
+      useValue: false
+      without: no-indent-heuristic
+    - name: no-indent-heuristic
+      type: option
+      useValue: false
+      without: indent-heuristic
+    - name: minimal
+      type: option
+      useValue: false
+    - name: patience
+      type: option
+      useValue: false
+      without:
+      - minimal
+      - histogram
+      - anchored
+      - diff-algorithm
+    - name: histogram
+      type: option
+      useValue: false
+      without:
+      - minimal
+      - patience
+      - anchored
+      - diff-algorithm
+    - name: anchored
+      type: option
+      join: '='
+      without:
+      - minimal
+      - patience
+      - histogram
+      - diff-algorithm
+    - name: diff-algorithm
+      type: option
+      join: '='
+      without:
+      - anchored
+      - patience
+      - histogram
+      choices:
+      - default
+      - patience
+      - minimal
+      - histogram
+      - myers
+    - name: stat
+      type: option
+      useValue: string
+      join: ''
+      without:
+      - numstat
+      - shortstat
+      - dirstat
+    - name: compact-summary
+      type: option
+      useValue: false
+    - name: numstat
+      type: option
+      useValue: false
+      without:
+      - stat
+      - shortstat
+      - dirstat
+    - name: shortstat
+      type: option
+      useValue: false
+      without:
+      - stat
+      - numstat
+      - dirstat
+    - name: dirstat
+      type: option
+      useValue: string
+      join: '='
+      without:
+      - stat
+      - numstat
+      - shortstat
+    - name: summary
+      type: option
+      useValue: false
+    - name: patch-with-stat
+      type: option
+      useValue: false
+    - name: z
+      type: flag
+    - name: name-only
+      type: option
+      useValue: false
+      without: name-status
+    - name: name-status
+      type: option
+      useValue: false
+      without: name-only
+    - name: submodule
+      type: option
+      useValue: string
+      join: '='
+    - name: color
+      type: option
+      useValue: string
+      join: '='
+      without: no-color
+    - name: no-color
+      type: option
+      useValue: false
+      without: color
+    - name: color-moved
+      type: option
+      useValue: string
+      join: '='
+      choices:
+      - 'no'
+      - default
+      - plain
+      - blocks
+      - zebra
+      - dimmed-zebra
+      without:
+      - no-color-moved
+      - color-moved-ws
+      - no-color-moved-ws
+    - name: no-color-moved
+      type: option
+      useValue: false
+      without:
+      - color-moved
+      - color-moved-ws
+      - no-color-moved-ws
+    - name: color-moved-ws
+      type: option
+      useValue: string
+      join: '='
+      choices:
+      - 'no'
+      - ignore-space-at-eol
+      - ignore-space-change
+      - ignore-all-space
+      - allow-indentation-change
+      without:
+      - color-moved
+      - no-color-moved
+      - no-color-moved-ws
+    - name: no-color-moved-ws
+      type: option
+      useValue: false
+      without:
+      - color-moved
+      - no-color-moved
+      - color-moved-ws
+    - name: word-diff
+      type: option
+      useValue: string
+      join: '='
+      choices:
+      - color
+      - plain
+      - porcelain
+      - none
+      without:
+      - word-diff-regex
+    - name: word-diff-regex
+      type: option
+      useValue: string
+      join: '='
+      without:
+      - word-diff
+    - name: color-words
+      type: option
+      useValue: string
+      join: '='
+    - name: no-renames
+      type: option
+      useValue: false
+    - name: check
+      type: option
+      useValue: false
+    - name: ws-error-highlight
+      type: option
+      join: '='
+    - name: full-index
+      type: option
+      useValue: false
+    - name: binary
+      type: option
+      useValue: false
+    - name: abbrev
+      type: option
+      useValue: number
+      join: '='
+    - name: break-rewrites
+      type: option
+      useValue:
+      - string
+      - number
+      join: '='
       without: B
     - name: B
       type: flag
+      useValue:
+      - string
+      - number
+      join: ''
+      without: break-rewrites
+    - name: find-renames
+      type: option
+      useValue: number
+      join: '='
+      without: M
+    - name: M
+      type: flag
+      useValue: number
+      join: ''
+      without: find-renames
+    - name: find-copies
+      type: option
+      useValue: number
+      join: '='
+      without: C
+    - name: C
+      type: flag
+      useValue: number
+      join: ''
+      without: find-copies
+    - name: find-copies-harder
+      type: option
+      useValue: false
+    - name: irreversible-delete
+      type: option
+      useValue: false
+      without: D
+    - name: D
+      type: flag
+      without: irreversible-delete
+    - name: l
+      type: flag
       useValue: true
-      without: b
-    - name: track
-      type: option
-      without: no-track
-    - name: no-track
-      type: option
-      without: track
-    - name: start-point
-      type: value
-  - command: clone
-    args:
-    - name: url
-      type: value
-    - name: dest
-      type: value
-  - command: rev-parse
-    args:
-    - name: short
+      join: ''
+    - name: diff-filter
       type: option
       join: '='
-      default: 12
-    - name: refspec
-      type: value
-      default: HEAD
+    - name: S
+      type: flag
+      useValue: true
+      join: ''
+    - name: G
+      type: flag
+      useValue: true
+      join: ''
+    - name: find-object
+      type: option
+      join: '='
+    - name: pickaxe-all
+      type: option
+      useValue: false
+      with:
+      - S
+      - G
+    - name: pickaxe-regex
+      type: option
+      useValue: false
+      with: S
+    - name: O
+      type: flag
+      useValue: true
+      join: '='
+    - name: R
+      type: flag
+    - name: relative
+      type: option
+      useValue: string
+      join: '='
+    - name: text
+      type: option
+      useValue: false
+      without: a
+    - name: a
+      type: flag
+      without: text
+    - name: ignore-cr-at-eol
+      type: option
+      useValue: false
+    - name: ignore-space-at-eol
+      type: option
+      useValue: false
+    - name: ignore-space-change
+      type: option
+      useValue: false
+      without: b
+    - name: b
+      type: flag
+      without: ignore-space-change
+    - name: ignore-all-space
+      type: option
+      useValue: false
+      without: w
+    - name: w
+      type: flag
+      without: ignore-all-space
+    - name: ignore-blank-lines
+      type: option
+      useValue: false
+    - name: inter-hunk-context
+      type: option
+      join: '='
+    - name: function-context
+      type: option
+      useValue: false
+      without: W
+    - name: W
+      type: flag
+      without: function-context
+    - name: exit-code
+      type: option
+      useValue: false
+    - name: quiet
+      type: option
+      useValue: false
+    - name: ext-diff
+      type: option
+      useValue: false
+      without: no-ext-diff
+    - name: no-ext-diff
+      type: option
+      useValue: false
+      without: ext-diff
+    - name: text-conv
+      type: option
+      useValue: false
+      without: no-text-conv
+    - name: no-text-conv
+      type: option
+      useValue: false
+      without: text-conv
+    - name: ignore-submodules
+      type: option
+      useValue: string
+      join: '='
+      choices:
+      - none
+      - untracked
+      - dirty
+      - all
+    - name: src-prefix
+      type: option
+      join: '='
+      without: no-prefix
+    - name: dst-prefix
+      type: option
+      join: '='
+      without: no-prefix
+    - name: no-prefix
+      type: option
+      useValue: false
+      without:
+      - src-prefix
+      - dst-prefix
+    - name: line-prefix
+      type: option
+      join: '='

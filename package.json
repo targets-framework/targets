@@ -26,7 +26,6 @@
   "license": "MIT",
   "dependencies": {
     "@hapi/joi": "^15.0.0",
-    "@targets/git": "^0.1.0",
     "answers": "^4.0.5",
     "axios": "^0.18.0",
     "blessed": "^0.1.81",
@@ -46,7 +45,7 @@
     "needful": "^1.8.2",
     "requireg": "^0.2.1",
     "resolve-global": "^1.0.0",
-    "shellspec": "^0.2.0",
+    "shellspec": "^1.0.0",
     "stream-line-wrapper": "0.1.1",
     "stream-to-promise": "^2.2.0",
     "sugarmerge": "^0.2.5"
