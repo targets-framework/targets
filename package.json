@@ -1,6 +1,6 @@
 {
   "name": "targets",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "a task orchestration and composition framework",
   "main": "index.js",
   "bin": {
