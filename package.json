@@ -1,6 +1,6 @@
 {
   "name": "targets",
-  "version": "1.11.0",
+  "version": "2.0.0-alpha-1",
   "description": "a task orchestration and composition framework",
   "main": "index.js",
   "bin": {
@@ -8,11 +8,8 @@
     "t": "./bin/index.js"
   },
   "scripts": {
-    "lint": "./node_modules/.bin/eslint .",
-    "test": "./node_modules/.bin/mocha \"test/**/*.spec.js\"",
-    "watch": "npm run test -- --watch",
-    "coverage": "rm -rf ./coverage && ./node_modules/.bin/nyc --reporter=html --reporter=lcov npm test",
-    "coverage:check": "npm run coverage && ./node_modules/.bin/nyc check-coverage --root=\"./coverage\" --statement 60 --function 75 --branch 40"
+    "test": "ava test/*.spec.js",
+    "watch": "npm run test -- --watch"
   },
   "homepage": "https://targets.gitbook.io/",
   "repository": {
@@ -24,48 +21,13 @@
     "email": "mac@machellerogden.com"
   },
   "license": "MIT",
-  "dependencies": {
-    "@hapi/joi": "^15.0.0",
-    "answers": "^4.0.5",
-    "axios": "^0.19.0",
-    "blessed": "^0.1.81",
-    "blessed-xterm": "^1.1.20",
-    "byline": "^5.0.0",
-    "callsites": "^3.1.0",
-    "chalk": "^2.4.1",
-    "ci-info": "^1.4.0",
-    "edn-to-js": "0.0.4",
-    "figures": "^2.0.0",
-    "flat": "^4.1.0",
-    "globby": "^8.0.1",
-    "inquirer": "^6.0.0",
-    "js-yaml": "^3.13.1",
-    "lodash": "^4.17.11",
-    "mem": "^3.0.1",
-    "needful": "^1.8.2",
-    "requireg": "^0.2.1",
-    "resolve-global": "^1.0.0",
-    "shellspec": "^1.0.5",
-    "stream-line-wrapper": "0.1.1",
-    "stream-to-promise": "^2.2.0",
-    "sugarmerge": "^0.2.5"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "babel-eslint": "^8.2.6",
-    "bytes": "^3.0.0",
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
-    "eslint": "^5.16.0",
-    "mocha": "^5.2.0",
-    "nyc": "^14.1.0",
-    "pre-commit": "1.2.2",
-    "proxyquire": "1.7.11",
-    "sinon": "^6.1.4",
-    "sinon-chai": "^3.2.0",
-    "weather-js": "2.0.0"
+    "ava": "^2.2.0",
+    "sinon": "^7.3.2",
+    "pre-commit": "^1.2.2"
   },
   "pre-commit": [
-    "lint",
     "test"
   ],
   "engines": {
