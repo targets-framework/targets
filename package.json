@@ -31,7 +31,7 @@
     "js-yaml": "^3.13.1",
     "pdn": "^0.3.3",
     "shellspec": "^1.0.5",
-    "sota": "0.0.20",
+    "sota": "0.0.22",
     "sugarmerge": "^0.2.5",
     "trajectory": "0.0.8"
   },
