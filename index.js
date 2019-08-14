@@ -11,26 +11,9 @@ const debug = v => console.log(inspect(v, { colors: true, depth: null }));
 
 const { load, sourceExpander } = require('./lib/load');
 const { stateSchema, optionsSchema } = require('./lib/schema');
-
-function processLoaders(targets, loaders) {
-    return Object.entries(targets).reduce((acc, [name, target]) => {
-        if (target != null && target.kind) {
-            const { kind } = target;
-            if (typeof loaders[kind] != 'function') throw new Error(`${kind} is not a valid loader`);
-            return { ...acc, [name]: loaders[kind](target) };
-        }
-        return acc;
-    }, targets);
-}
-
-function prefixOptions(argv) {
-    return argv.reduce((acc, arg) => {
-        const { done, a } = acc;
-        if (/^--$/.test(arg)) return { done: true, a: [ ...a, arg ] };
-        if (!done && /^--.*/.test(arg)) arg = `--input.${arg.slice(2)}`;
-        return { done, a: [ ...a, arg ] };
-    }, { done: false, a: [] }).a;
-}
+const streamToPromise = require('stream-to-promise');
+const { prefixOptions } = require('./lib/util');
+const { resolveTarget, loadResource } = require('./lib/resolve');
 
 async function Targets(options = {}) {
     try {
@@ -58,9 +41,14 @@ async function Targets(options = {}) {
             ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
             : givenTargets;
         const loaders = { ...builtinLoaders, ...customLoaders };
-        const resources = processLoaders(targets, loaders);
 
         const definition = config._;
+        const resourceCache = new WeakMap();
+        const resources = new Proxy({}, {
+            get(_, name) {
+                return resourceCache[name] || loadResource(name, resolveTarget(targets, name), loaders);
+            }
+        });
         const machine = await readAll(definition);
         debug(machine);
         const t = new Trajectory({ resources });

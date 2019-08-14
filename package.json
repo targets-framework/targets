@@ -4,8 +4,8 @@
   "description": "a task orchestration and composition framework",
   "main": "index.js",
   "bin": {
-    "targets": "./bin/index.js",
-    "t": "./bin/index.js"
+    "targets": "./index.js",
+    "t": "./index.js"
   },
   "scripts": {
     "test": "ava test/*.spec.js",
@@ -30,8 +30,11 @@
     "inquirer": "^6.5.1",
     "js-yaml": "^3.13.1",
     "pdn": "^0.3.3",
+    "requireg": "^0.2.2",
+    "resolve-global": "^1.0.0",
     "shellspec": "^1.0.5",
     "sota": "0.0.22",
+    "stream-to-promise": "^2.2.0",
     "sugarmerge": "^0.2.5",
     "trajectory": "0.0.8"
   },
