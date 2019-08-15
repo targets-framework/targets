@@ -7,7 +7,7 @@ const DefaultAnswers = require('answers');
 const callsites = require('callsites');
 const builtinLoaders = require('./lib/loaders');
 const { inspect } = require('util');
-const debug = v => console.log(inspect(v, { colors: true, depth: null }));
+const debug = v => process.env.DEBUG && console.log(inspect(v, { colors: true, depth: null }));
 
 const { load, sourceExpander } = require('./lib/load');
 const { stateSchema, optionsSchema } = require('./lib/schema');
