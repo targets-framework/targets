@@ -22,26 +22,26 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@hapi/joi": "^15.1.0",
-    "answers": "^4.0.5",
-    "callsites": "^3.1.0",
+    "@hapi/joi": "15.1.0",
+    "answers": "4.0.5",
+    "callsites": "3.1.0",
     "edn-to-js": "0.0.4",
-    "globby": "^10.0.1",
-    "inquirer": "^6.5.1",
-    "js-yaml": "^3.13.1",
-    "pdn": "^0.3.3",
+    "globby": "10.0.1",
+    "inquirer": "6.5.1",
+    "js-yaml": "3.13.1",
+    "pdn": "0.3.4",
     "requireg": "^0.2.2",
     "resolve-global": "^1.0.0",
-    "shellspec": "^1.0.5",
-    "sota": "0.0.22",
-    "stream-to-promise": "^2.2.0",
-    "sugarmerge": "^0.2.5",
+    "shellspec": "1.0.5",
+    "sota": "0.0.24",
+    "stream-to-promise": "2.2.0",
+    "sugarmerge": "0.2.5",
     "trajectory": "0.0.8"
   },
   "devDependencies": {
-    "ava": "^2.2.0",
-    "sinon": "^7.3.2",
-    "pre-commit": "^1.2.2"
+    "ava": "2.2.0",
+    "sinon": "7.3.2",
+    "pre-commit": "1.2.2"
   },
   "pre-commit": [
     "test"
