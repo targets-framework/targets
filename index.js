@@ -31,14 +31,16 @@ async function Targets(options = {}) {
         process.title = name;
 
         const prefixedArgv = prefixOptions(argv);
-        const config = await stateSchema.validate(await Answers({
+        const rawConfig = await Answers({
             name,
             argv: prefixedArgv,
             loaders: [ sourceExpander ]
-        }));
+        });
+        const config = await stateSchema.validate(rawConfig);
         const source = [ ...givenSource, ...config.source ];
+        const loadedTargets = await load({ patterns: source, cwd: path.dirname(calledFrom) });
         const targets = source.length
-            ? { ...givenTargets, ...load({ patterns: source, cwd: path.dirname(calledFrom) }) }
+            ? { ...givenTargets, ...loadedTargets }
             : givenTargets;
         const loaders = { ...builtinLoaders, ...customLoaders };
 
@@ -51,7 +53,7 @@ async function Targets(options = {}) {
         });
         const machine = await readAll(definition);
         debug(machine);
-        const t = new Trajectory({ resources });
+        const t = new Trajectory({ resources, debug: !!process.env.DEBUG });
 
         const input = config.input;
         return t.execute(machine, input);
