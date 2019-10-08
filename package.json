@@ -29,7 +29,7 @@
     "globby": "10.0.1",
     "inquirer": "6.5.1",
     "js-yaml": "3.13.1",
-    "pdn": "^0.3.4",
+    "pdn": "^0.3.7",
     "requireg": "^0.2.2",
     "resolve-global": "^1.0.0",
     "shellspec": "1.0.5",
