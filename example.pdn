@@ -1,1 +1,1 @@
-git.rev-parse @re{name.$ $} hello
+git.rev-parse @-[{name.$ $} hello]

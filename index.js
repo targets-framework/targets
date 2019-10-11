@@ -6,8 +6,10 @@ const { Trajectory } = require('trajectory');
 const DefaultAnswers = require('answers');
 const callsites = require('callsites');
 const builtinLoaders = require('./lib/loaders');
+
 const { inspect } = require('util');
-const debug = v => process.env.DEBUG && console.log(inspect(v, { colors: true, depth: null }));
+const debug =  !!process.env.DEBUG;
+const log = (l, v) => process.env.DEBUG && console.log(l, inspect(v, { colors: true, depth: null }));
 
 const { load, sourceExpander } = require('./lib/load');
 const { stateSchema, optionsSchema } = require('./lib/schema');
@@ -52,8 +54,8 @@ async function Targets(options = {}) {
             }
         });
         const machine = await readAll(definition);
-        debug(machine);
-        const t = new Trajectory({ resources, debug: !!process.env.DEBUG });
+        log('machine', machine);
+        const t = new Trajectory({ reporterOptions: { finalPrint: debug }, resources, debug });
 
         const input = config.input;
         return t.execute(machine, input);

@@ -25,18 +25,20 @@
     "@hapi/joi": "15.1.0",
     "answers": "4.0.5",
     "callsites": "3.1.0",
+    "chalk": "^2.4.2",
     "edn-to-js": "0.0.4",
     "globby": "10.0.1",
     "inquirer": "6.5.1",
     "js-yaml": "3.13.1",
+    "log-symbols": "^3.0.0",
     "pdn": "^0.3.7",
     "requireg": "^0.2.2",
     "resolve-global": "^1.0.0",
     "shellspec": "1.0.5",
-    "sota": "0.2.3",
+    "sota": "0.2.4",
     "stream-to-promise": "2.2.0",
     "sugarmerge": "0.2.5",
-    "trajectory": "0.0.12"
+    "trajectory": "0.0.14"
   },
   "devDependencies": {
     "ava": "2.2.0",
