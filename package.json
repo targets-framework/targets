@@ -33,7 +33,7 @@
     "requireg": "^0.2.2",
     "resolve-global": "^1.0.0",
     "shellspec": "1.0.5",
-    "sota": "0.2.2",
+    "sota": "0.2.3",
     "stream-to-promise": "2.2.0",
     "sugarmerge": "0.2.5",
     "trajectory": "0.0.12"
