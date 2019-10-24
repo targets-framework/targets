@@ -15,7 +15,7 @@ const { load, sourceExpander } = require('./lib/load');
 const { stateSchema, optionsSchema } = require('./lib/schema');
 const streamToPromise = require('stream-to-promise');
 const { prefixOptions } = require('./lib/util');
-const { resolveTarget, loadResource } = require('./lib/resolve');
+const { resolveTarget, loadResource, Resolver } = require('./lib/resolve');
 
 async function Targets(options = {}) {
     try {
@@ -53,7 +53,7 @@ async function Targets(options = {}) {
                 return resourceCache[name] || loadResource(name, resolveTarget(targets, name), loaders);
             }
         });
-        const machine = await readAll(definition);
+        const machine = await readAll(definition, { resolver: Resolver(targets) });
         log('machine', machine);
         const t = new Trajectory({ reporterOptions: { finalPrint: debug }, resources, debug });
 
