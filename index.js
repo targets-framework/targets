@@ -8,8 +8,9 @@ const callsites = require('callsites');
 const builtinLoaders = require('./lib/loaders');
 
 const { inspect } = require('util');
-const debug =  !!process.env.DEBUG;
-const log = (l, v) => process.env.DEBUG && console.log(l, inspect(v, { colors: true, depth: null }));
+const debug = !!process.env.DEBUG;
+const dry_run = !!process.env.DRY_RUN;
+const log = (l, v) => (debug || dry_run) && console.log(`${l}\n${inspect(v, { colors: true, depth: null })}`);
 
 const { load, sourceExpander } = require('./lib/load');
 const { stateSchema, optionsSchema } = require('./lib/schema');
@@ -54,7 +55,8 @@ async function Targets(options = {}) {
             }
         });
         const machine = await readAll(definition, { resolver: Resolver(targets) });
-        log('machine', machine);
+        log('machine definition:', machine);
+        if (dry_run) process.exit(0);
         const t = new Trajectory({ reporterOptions: { finalPrint: debug }, resources, debug });
 
         const input = config.input;
