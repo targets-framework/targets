@@ -20,6 +20,7 @@ For full documentation please visit [targets.gitbook.io](https://targets.gitbook
 - [x] pdn support for target data loader
 - [x] dry run support
 - [ ] recursive submachine support - non-trivial but doable
+- [ ] many many more unit tests
 - [ ] pdn support for config (via answers)
 - [ ] update all targets documentation
 - [ ] remove sugarmerge from answers? fork? optional merge fn? seems orthogonal now... adds undue complexity
