@@ -10,7 +10,7 @@ const builtinLoaders = require('./lib/loaders');
 const { inspect } = require('util');
 const debug = !!process.env.DEBUG;
 const dry_run = !!process.env.DRY_RUN;
-const log = (l, v) => (debug || dry_run) && console.log(`${l}\n${inspect(v, { colors: true, depth: null })}`);
+const log = (l, v) => (debug || dry_run) && console.log(`${dry_run ? JSON.stringify(v, null, 2) : `${l}\n${inspect(v, { colors: true, depth: null })}`}`);
 
 const { load, sourceExpander } = require('./lib/load');
 const { stateSchema, optionsSchema } = require('./lib/schema');
