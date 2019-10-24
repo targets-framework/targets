@@ -20,6 +20,7 @@ For full documentation please visit [targets.gitbook.io](https://targets.gitbook
 - [x] pdn support for target data loader
 - [x] dry run support
 - [ ] strengthen streaming output support - some commands are running silently!
+- [ ] refine reported and output modes
 - [ ] recursive submachine support - non-trivial but doable
 - [ ] many many more unit tests
 - [ ] pdn support for config (via answers)
