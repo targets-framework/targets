@@ -41,7 +41,7 @@
     "inquirer": "^6.0.0",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.11",
-    "mem": "^3.0.1",
+    "mem": "^4.0.0",
     "needful": "^1.8.2",
     "requireg": "^0.2.1",
     "resolve-global": "^1.0.0",
